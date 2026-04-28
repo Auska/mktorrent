@@ -30,7 +30,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
 #include <time.h>         /* nanosleep() */
 
 #ifdef USE_OPENSSL
-#include <openssl/sha.h>  /* SHA1() */
+#include <openssl/evp.h>  /* EVP_MD_CTX */
+#include <openssl/sha.h>  /* SHA_DIGEST_LENGTH */
 #else
 #include "sha1.h"
 #endif
@@ -193,6 +194,19 @@ static void *worker(void *data)
 {
 	struct queue *q = data;
 	struct piece *p;
+#ifdef USE_OPENSSL
+	EVP_MD_CTX *ctx = EVP_MD_CTX_new();
+	FATAL_IF0(ctx == NULL, "cannot create EVP context\n");
+
+	while ((p = get_full(q))) {
+		EVP_DigestInit_ex(ctx, EVP_sha1(), NULL);
+		EVP_DigestUpdate(ctx, p->data, p->len);
+		EVP_DigestFinal_ex(ctx, p->dest, NULL);
+		put_free(q, p, 1);
+	}
+
+	EVP_MD_CTX_free(ctx);
+#else
 	SHA_CTX c;
 
 	while ((p = get_full(q))) {
@@ -201,6 +215,7 @@ static void *worker(void *data)
 		SHA1_Final(p->dest, &c);
 		put_free(q, p, 1);
 	}
+#endif
 
 	return NULL;
 }

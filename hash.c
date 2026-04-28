@@ -27,7 +27,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
 #include <inttypes.h>     /* PRId64 etc. */
 
 #ifdef USE_OPENSSL
-#include <openssl/sha.h>  /* SHA1() */
+#include <openssl/evp.h>  /* EVP_MD_CTX */
+#include <openssl/sha.h>  /* SHA_DIGEST_LENGTH */
 #else
 #include "sha1.h"
 #endif
@@ -63,7 +64,11 @@ EXPORT unsigned char *make_hash(struct metafile *m)
 	int fd;                         /* file descriptor */
 	size_t r;                       /* number of bytes read from file(s) into
 	                                   the read buffer */
+#ifdef USE_OPENSSL
+	EVP_MD_CTX *ctx;                /* EVP hashing context */
+#else
 	SHA_CTX c;                      /* SHA1 hashing context */
+#endif
 #ifndef NO_HASH_CHECK
 	uintmax_t counter = 0;          /* number of bytes hashed
 	                                   should match size when done */
@@ -77,6 +82,11 @@ EXPORT unsigned char *make_hash(struct metafile *m)
 
 	/* check if we've run out of memory */
 	FATAL_IF0(hash_string == NULL || read_buf == NULL, "out of memory\n");
+
+#ifdef USE_OPENSSL
+	ctx = EVP_MD_CTX_new();
+	FATAL_IF0(ctx == NULL, "cannot create EVP context\n");
+#endif
 
 	/* initiate pos to point to the beginning of hash_string */
 	pos = hash_string;
@@ -107,9 +117,15 @@ EXPORT unsigned char *make_hash(struct metafile *m)
 			r += d;
 
 			if (r == m->piece_length) {
+#ifdef USE_OPENSSL
+				EVP_DigestInit_ex(ctx, EVP_sha1(), NULL);
+				EVP_DigestUpdate(ctx, read_buf, m->piece_length);
+				EVP_DigestFinal_ex(ctx, pos, NULL);
+#else
 				SHA1_Init(&c);
 				SHA1_Update(&c, read_buf, m->piece_length);
 				SHA1_Final(pos, &c);
+#endif
 				pos += SHA_DIGEST_LENGTH;
 #ifndef NO_HASH_CHECK
 				counter += r;	/* r == piece_length */
@@ -125,10 +141,20 @@ EXPORT unsigned char *make_hash(struct metafile *m)
 
 	/* finally append the hash of the last irregular piece to the hash string */
 	if (r) {
+#ifdef USE_OPENSSL
+		EVP_DigestInit_ex(ctx, EVP_sha1(), NULL);
+		EVP_DigestUpdate(ctx, read_buf, r);
+		EVP_DigestFinal_ex(ctx, pos, NULL);
+#else
 		SHA1_Init(&c);
 		SHA1_Update(&c, read_buf, r);
 		SHA1_Final(pos, &c);
+#endif
 	}
+
+#ifdef USE_OPENSSL
+	EVP_MD_CTX_free(ctx);
+#endif
 
 #ifndef NO_HASH_CHECK
 	counter += r;
