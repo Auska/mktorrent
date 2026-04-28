@@ -63,7 +63,7 @@
 #-------------Nothing interesting below this line-----------------------------
 
 program = mktorrent
-version = 1.1
+version = V$(shell date +%Y%m%d)
 
 HEADERS  = mktorrent.h ll.h
 SRCS     = ftw.c init.c sha1.c hash.c output.c main.c msg.c ll.c
