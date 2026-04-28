@@ -174,6 +174,14 @@ EXPORT void write_metainfo(FILE *f, struct metafile *m, unsigned char *hash_stri
 		fprintf(f, "13:creation datei%lde",
 			(long)time(NULL));
 
+	if (m->publisher)
+		fprintf(f, "9:publisher%lu:%s",
+			(unsigned long) strlen(m->publisher), m->publisher);
+
+	if (m->publisher_url)
+		fprintf(f, "13:publisher-url%lu:%s",
+			(unsigned long) strlen(m->publisher_url), m->publisher_url);
+
 	/* now here comes the info section
 	   it is yet another dictionary */
 	fprintf(f, "4:infod");
@@ -208,14 +216,6 @@ EXPORT void write_metainfo(FILE *f, struct metafile *m, unsigned char *hash_stri
 	if (m->source)
 		fprintf(f, "6:source%lu:%s",
 			(unsigned long) strlen(m->source), m->source);
-
-	if (m->publisher)
-		fprintf(f, "9:publisher%lu:%s",
-			(unsigned long) strlen(m->publisher), m->publisher);
-
-	if (m->publisher_url)
-		fprintf(f, "13:publisher-url%lu:%s",
-			(unsigned long) strlen(m->publisher_url), m->publisher_url);
 
 	/* end the info section */
 	fprintf(f, "e");
