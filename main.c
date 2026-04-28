@@ -116,6 +116,8 @@ int main(int argc, char *argv[])
 		NULL, /* announce_list */
 		NULL, /* comment */
 		NULL, /* created_by */
+		NULL, /* publisher */
+		NULL, /* publisher_url */
 		NULL, /* torrent_name */
 		NULL, /* metainfo_file_path */
 		NULL, /* web_seed_url */

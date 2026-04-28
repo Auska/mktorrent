@@ -39,6 +39,8 @@ struct metafile {
 	struct ll *announce_list;  /* announce URLs */
 	char *comment;             /* optional comment */
 	char *created_by;          /* optional created by string */
+	char *publisher;           /* optional publisher string */
+	char *publisher_url;       /* optional publisher URL string */
 	const char *torrent_name;  /* name of torrent (name of directory) */
 	char *metainfo_file_path;  /* absolute path to the metainfo file */
 	struct ll *web_seed_list;  /* web seed URLs */

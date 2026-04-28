@@ -269,6 +269,8 @@ static void print_help()
 	  "-o, --output=<filename>       : set the path and filename of the created file\n"
 	  "                                default is <name>.torrent\n"
 	  "-p, --private                 : set the private flag\n"
+	  "-u, --publisher=<name>       : set the publisher string\n"
+	  "-i, --publisher-url=<url>    : set the publisher URL\n"
 	  "-s, --source=<source>         : add source string embedded in infohash\n"
 #ifdef USE_PTHREADS
 	  "-t, --threads=<n>             : use <n> threads for calculating hashes\n"
@@ -295,6 +297,8 @@ static void print_help()
 	  "-o <filename>     : set the path and filename of the created file\n"
 	  "                    default is <name>.torrent\n"
 	  "-p                : set the private flag\n"
+	  "-u <name>         : set the publisher string\n"
+	  "-i <url>          : set the publisher URL\n"
 	  "-s                : add source string embedded in infohash\n"
 #ifdef USE_PTHREADS
 	  "-t <n>            : use <n> threads for calculating hashes\n"
@@ -443,6 +447,8 @@ EXPORT void init(struct metafile *m, int argc, char *argv[])
 		{"name", 1, NULL, 'n'},
 		{"output", 1, NULL, 'o'},
 		{"private", 0, NULL, 'p'},
+		{"publisher", 1, NULL, 'u'},
+		{"publisher-url", 1, NULL, 'i'},
 		{"source", 1, NULL, 's'},
 #ifdef USE_PTHREADS
 		{"threads", 1, NULL, 't'},
@@ -468,9 +474,9 @@ EXPORT void init(struct metafile *m, int argc, char *argv[])
 
 	/* now parse the command line options given */
 #ifdef USE_PTHREADS
-#define OPT_STRING "a:b:c:e:dfhl:n:o:ps:t:vw:x"
+#define OPT_STRING "a:b:c:e:dfhi:l:n:o:ps:t:u:vw:x"
 #else
-#define OPT_STRING "a:b:c:e:dfhl:n:o:ps:vw:x"
+#define OPT_STRING "a:b:c:e:dfhi:l:n:o:ps:u:vw:x"
 #endif
 #ifdef USE_LONG_OPTIONS
 	while ((c = getopt_long(argc, argv, OPT_STRING,
@@ -514,6 +520,12 @@ EXPORT void init(struct metafile *m, int argc, char *argv[])
 			break;
 		case 'p':
 			m->private = 1;
+			break;
+		case 'u':
+			m->publisher = optarg;
+			break;
+		case 'i':
+			m->publisher_url = optarg;
 			break;
 		case 's':
 			m->source = optarg;
