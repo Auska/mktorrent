@@ -255,6 +255,7 @@ static void print_help()
 #ifdef USE_LONG_OPTIONS
 	  "-a, --announce=<url>[,<url>]* : specify the full announce URLs\n"
 	  "                                additional -a adds backup trackers\n"
+	  "-b, --created-by=<name>       : set the created by string\n"
 	  "-c, --comment=<comment>       : add a comment to the metainfo\n"
 	  "-d, --no-date                 : don't write the creation date\n"
 	  "-e, --exclude=<pat>[,<pat>]*  : exclude files whose name matches the pattern <pat>\n"
@@ -280,6 +281,7 @@ static void print_help()
 #else
 	  "-a <url>[,<url>]* : specify the full announce URLs\n"
 	  "                    additional -a adds backup trackers\n"
+	  "-b <name>         : set the created by string\n"
 	  "-c <comment>      : add a comment to the metainfo\n"
 	  "-d                : don't write the creation date\n"
 	  "-e <pat>[,<pat>]* : exclude files whose name matches the pattern <pat>\n"
@@ -432,6 +434,7 @@ EXPORT void init(struct metafile *m, int argc, char *argv[])
 	static struct option long_options[] = {
 		{"announce", 1, NULL, 'a'},
 		{"comment", 1, NULL, 'c'},
+		{"created-by", 1, NULL, 'b'},
 		{"no-date", 0, NULL, 'd'},
 		{"exclude", 1, NULL, 'e'},
 		{"force", 0, NULL, 'f'},
@@ -465,9 +468,9 @@ EXPORT void init(struct metafile *m, int argc, char *argv[])
 
 	/* now parse the command line options given */
 #ifdef USE_PTHREADS
-#define OPT_STRING "a:c:e:dfhl:n:o:ps:t:vw:x"
+#define OPT_STRING "a:b:c:e:dfhl:n:o:ps:t:vw:x"
 #else
-#define OPT_STRING "a:c:e:dfhl:n:o:ps:vw:x"
+#define OPT_STRING "a:b:c:e:dfhl:n:o:ps:vw:x"
 #endif
 #ifdef USE_LONG_OPTIONS
 	while ((c = getopt_long(argc, argv, OPT_STRING,
@@ -481,6 +484,9 @@ EXPORT void init(struct metafile *m, int argc, char *argv[])
 			FATAL_IF0(
 				ll_append(m->announce_list, get_slist(optarg), 0) == NULL,
 				"out of memory\n");
+			break;
+		case 'b':
+			m->created_by = optarg;
 			break;
 		case 'c':
 			m->comment = optarg;

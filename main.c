@@ -114,10 +114,11 @@ int main(int argc, char *argv[])
 		/* options */
 		0,    /* piece_length, 0 by default indicates length should be calculated automatically */
 		NULL, /* announce_list */
+		NULL, /* comment */
+		NULL, /* created_by */
 		NULL, /* torrent_name */
 		NULL, /* metainfo_file_path */
 		NULL, /* web_seed_url */
-		NULL, /* comment */
 		0,    /* target_is_directory  */
 		0,    /* no_creation_date */
 		0,    /* private */
