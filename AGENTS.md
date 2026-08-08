@@ -47,7 +47,7 @@ Unity-based unit tests cover `ll.c`, `sha1.c`, `hash.c` (serial), `output.c`, an
 ```sh
 xmake f --tests=y    # fetch unity_test and enable the mktorrent-tests target
 xmake               # build mktorrent + mktorrent-tests
-xmake run mktorrent-tests   # run the suite (expect "20 Tests 0 Failures")
+xmake run mktorrent-tests   # run the suite (expect "27 Tests 0 Failures")
 xmake f --tests=n    # disable tests again
 ```
 

@@ -17,6 +17,7 @@
 
 static int saved_stdout_fd = -1;
 static int null_fd = -1;
+static int saved_stderr_fd = -1;
 
 void silence_stdout(void)
 {
@@ -33,6 +34,23 @@ void restore_stdout(void)
 	close(saved_stdout_fd);
 	close(null_fd);
 	saved_stdout_fd = -1;
+}
+
+void silence_stderr(void)
+{
+	fflush(stderr);
+	saved_stderr_fd = dup(STDERR_FILENO);
+	null_fd = open(TEST_NULL_DEVICE, O_WRONLY);
+	dup2(null_fd, STDERR_FILENO);
+}
+
+void restore_stderr(void)
+{
+	fflush(stderr);
+	dup2(saved_stderr_fd, STDERR_FILENO);
+	close(saved_stderr_fd);
+	close(null_fd);
+	saved_stderr_fd = -1;
 }
 
 void test_free_file_data(void *data)

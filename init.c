@@ -51,7 +51,8 @@ static void strip_ending_dirseps(char *s)
 	while (*end)
 		end++;
 
-	while (end > s && *(--end) == DIRSEP_CHAR)
+	/* keep at least the first character so "/" is not emptied */
+	while (end > s + 1 && *(--end) == DIRSEP_CHAR)
 		*end = '\0';
 }
 

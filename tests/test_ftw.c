@@ -186,3 +186,21 @@ void test_ftw_skips_symlinks(void)
 	unlink(path);
 	rmdir(root);
 }
+
+void test_ftw_nonexistent_dir(void)
+{
+	struct metafile m = make_metafile();
+	int r;
+
+	silence_stderr();
+	r = file_tree_walk("/nonexistent_mktorrent_test_dir", 10,
+			collect_files, &m);
+	restore_stderr();
+
+	/* the walk reports failure instead of crashing */
+	TEST_ASSERT_NOT_EQUAL(0, r);
+	TEST_ASSERT_TRUE(LL_IS_EMPTY(m.file_list));
+
+	ll_free(m.file_list, test_free_file_data);
+	ll_free(m.exclude_list, NULL);
+}

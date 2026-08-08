@@ -139,6 +139,7 @@ if has_config("tests") then
             "tests/test_hash.c",
             "tests/test_output.c",
             "tests/test_ftw.c",
+            "tests/test_init.c",
             "tests/test_util.c")
         on_load(function (target)
             -- library under test (main.c and init.c are not unit tested);

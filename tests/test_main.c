@@ -25,6 +25,7 @@ void test_sha1_million_a_incremental(void);
 void test_hash_single_piece(void);
 void test_hash_two_pieces_single_file(void);
 void test_hash_spanning_files(void);
+void test_hash_spanning_three_files(void);
 
 /* test_output.c */
 void test_output_single_file(void);
@@ -36,6 +37,13 @@ void test_output_cross_seed(void);
 void test_ftw_collects_tree(void);
 void test_ftw_exclude_pattern(void);
 void test_ftw_skips_symlinks(void);
+void test_ftw_nonexistent_dir(void);
+
+/* test_init.c */
+void test_init_strip_ending_dirseps(void);
+void test_init_path_basename(void);
+void test_init_set_absolute_file_path(void);
+void test_init_get_slist(void);
 
 int main(void)
 {
@@ -57,6 +65,7 @@ int main(void)
 	RUN_TEST(test_hash_single_piece);
 	RUN_TEST(test_hash_two_pieces_single_file);
 	RUN_TEST(test_hash_spanning_files);
+	RUN_TEST(test_hash_spanning_three_files);
 
 	RUN_TEST(test_output_single_file);
 	RUN_TEST(test_output_optional_fields);
@@ -66,6 +75,12 @@ int main(void)
 	RUN_TEST(test_ftw_collects_tree);
 	RUN_TEST(test_ftw_exclude_pattern);
 	RUN_TEST(test_ftw_skips_symlinks);
+	RUN_TEST(test_ftw_nonexistent_dir);
+
+	RUN_TEST(test_init_strip_ending_dirseps);
+	RUN_TEST(test_init_path_basename);
+	RUN_TEST(test_init_set_absolute_file_path);
+	RUN_TEST(test_init_get_slist);
 
 	return UNITY_END();
 }

@@ -9,9 +9,11 @@
 #include "export.h"
 #include "mktorrent.h"
 
-/* redirect stdout to the null device and back (silences progress prints) */
+/* redirect stdout/stderr to the null device and back (silences noise) */
 void silence_stdout(void);
 void restore_stdout(void);
+void silence_stderr(void);
+void restore_stderr(void);
 
 /* frees the path member of a file_data node (ll_free destructor) */
 void test_free_file_data(void *data);
