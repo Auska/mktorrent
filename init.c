@@ -55,7 +55,8 @@ static void strip_ending_dirseps(char *s)
 		*end = '\0';
 }
 
-static const char *basename(const char *s)
+/* not called "basename" on purpose: it would shadow the POSIX basename() */
+static const char *path_basename(const char *s)
 {
 	const char *r = s;
 
@@ -572,7 +573,7 @@ EXPORT void init(struct metafile *m, int argc, char *argv[])
 
 	/* if the torrent name isn't set use the basename of the target */
 	if (m->torrent_name == NULL)
-		m->torrent_name = basename(argv[optind]);
+		m->torrent_name = path_basename(argv[optind]);
 
 	/* make sure m->metainfo_file_path is the absolute path to the file */
 	set_absolute_file_path(m);

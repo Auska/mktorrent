@@ -24,6 +24,11 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
 #include <time.h>         /* time() */
 #include <inttypes.h>     /* PRIuMAX */
 #include <stdlib.h>       /* random() */
+#include <unistd.h>       /* syscall() */
+
+#if defined(__linux__)
+#include <sys/syscall.h>  /* SYS_getrandom */
+#endif
 
 #ifdef USE_OPENSSL
 #include <openssl/sha.h>  /* SHA_DIGEST_LENGTH */
@@ -34,6 +39,24 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
 #include "export.h"       /* EXPORT */
 #include "mktorrent.h"    /* struct metafile */
 #include "output.h"
+
+
+/*
+ * fill buf with len bytes of randomness. Prefer the operating system's
+ * CSPRNG; random() is only a fallback (it is seeded in main()).
+ */
+static void get_random_bytes(unsigned char *buf, size_t len)
+{
+#if defined(__linux__) && defined(SYS_getrandom)
+	if (syscall(SYS_getrandom, buf, len, 0) == (ssize_t)len)
+		return;
+#endif
+	size_t i;
+
+	for (i = 0; i < len; i++)
+		buf[i] = (unsigned char)random();
+}
+
 
 
 /*
@@ -196,11 +219,20 @@ EXPORT void write_metainfo(FILE *f, struct metafile *m, unsigned char *hash_stri
 		write_file_list(f, m->file_list);
 
 	if (m->cross_seed) {
-		fprintf(f, "12:x_cross_seed%u:mktorrent-", CROSS_SEED_RAND_LENGTH * 2 + 10);
-		for (int i = 0; i < CROSS_SEED_RAND_LENGTH; i++) {
-			unsigned char rand_byte = random();
-			fputc("0123456789ABCDEF"[rand_byte >> 4], f);
-			fputc("0123456789ABCDEF"[rand_byte & 0x0F], f);
+		static const char hex[] = "0123456789ABCDEF";
+		static const char prefix[] = "mktorrent-";
+		unsigned char rand_buf[CROSS_SEED_RAND_LENGTH];
+		unsigned int i;
+
+		get_random_bytes(rand_buf, sizeof(rand_buf));
+
+		/* the length prefix is the prefix string plus 2 hex digits per byte */
+		fprintf(f, "12:x_cross_seed%u:%s",
+			(unsigned)(sizeof(prefix) - 1 + 2 * sizeof(rand_buf)),
+			prefix);
+		for (i = 0; i < sizeof(rand_buf); i++) {
+			fputc(hex[rand_buf[i] >> 4], f);
+			fputc(hex[rand_buf[i] & 0x0F], f);
 		}
 	}
 

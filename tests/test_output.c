@@ -188,9 +188,10 @@ void test_output_cross_seed(void)
 	struct metafile m = make_empty_metafile();
 	unsigned char hash[20];
 	unsigned char *buf;
-	size_t len;
+	size_t len, pos, i;
 	char path[] = "seed.bin";
 	struct file_data fd = { path, 1 };
+	char needle[64];
 
 	memset(hash, 0, sizeof(hash));
 	m.torrent_name = "seed";
@@ -201,8 +202,21 @@ void test_output_cross_seed(void)
 
 	write_to_memory(&m, hash, &buf, &len);
 
-	/* "mktorrent-" plus 2*CROSS_SEED_RAND_LENGTH hex digits */
-	assert_contains(buf, len, "12:x_cross_seed42:mktorrent-");
+	/* the length prefix must equal the payload: the "mktorrent-" prefix
+	   plus 2*CROSS_SEED_RAND_LENGTH hex digits (no magic numbers) */
+	snprintf(needle, sizeof(needle), "12:x_cross_seed%zu:mktorrent-",
+		strlen("mktorrent-") + 2 * CROSS_SEED_RAND_LENGTH);
+	assert_contains(buf, len, needle);
+
+	/* every payload character is an uppercase hex digit */
+	pos = test_find_bytes(buf, len, (const unsigned char *)needle,
+			strlen(needle));
+	TEST_ASSERT_NOT_EQUAL((size_t)-1, pos);
+	pos += strlen(needle);
+	for (i = 0; i < 2 * CROSS_SEED_RAND_LENGTH; i++) {
+		char c = (char)buf[pos + i];
+		TEST_ASSERT_TRUE((c >= '0' && c <= '9') || (c >= 'A' && c <= 'F'));
+	}
 
 	free(buf);
 	ll_free(m.file_list, NULL);

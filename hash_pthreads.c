@@ -45,6 +45,11 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
 #define PROGRESS_PERIOD 200000
 #endif
 
+/* total budget for in-flight piece buffers, in bytes */
+#ifndef BUFFER_MEMORY_LIMIT
+#define BUFFER_MEMORY_LIMIT (64U * 1024U * 1024U)
+#endif
+
 #ifndef O_BINARY
 #define O_BINARY 0
 #endif
@@ -302,7 +307,17 @@ EXPORT unsigned char *make_hash(struct metafile *m)
 	FATAL_IF0(workers == NULL || hash_string == NULL, "out of memory\n");
 
 	q.pieces = m->pieces;
-	q.buffers_max = 3*m->threads;
+	/* keep up to 3 in-flight buffers per worker, but never more than the
+	   total memory budget allows, and at least one per worker so the
+	   threads stay busy. Without the budget, huge piece lengths would
+	   allocate 3*threads*piece_length bytes (e.g. 20 threads with 256 MiB
+	   pieces would grab ~15 GiB). */
+	q.buffers_max = 3 * (unsigned int)m->threads;
+	unsigned int max_by_memory = BUFFER_MEMORY_LIMIT / m->piece_length;
+	if (q.buffers_max > max_by_memory)
+		q.buffers_max = max_by_memory;
+	if (q.buffers_max < (unsigned int)m->threads)
+		q.buffers_max = (unsigned int)m->threads;
 
 	/* create worker threads */
 	for (i = 0; i < m->threads; i++) {
