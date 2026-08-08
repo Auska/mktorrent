@@ -18,31 +18,30 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
 */
 
 
-#include <sys/types.h>    /* off_t */
-#include <stdio.h>        /* fprintf() etc. */
-#include <string.h>       /* strlen() etc. */
-#include <time.h>         /* time() */
-#include <inttypes.h>     /* PRIuMAX */
-#include <stdlib.h>       /* random() */
-#include <unistd.h>       /* syscall() */
+#include <sys/types.h> /* off_t */
+#include <stdio.h>     /* fprintf() etc. */
+#include <string.h>    /* strlen() etc. */
+#include <time.h>      /* time() */
+#include <inttypes.h>  /* PRIuMAX */
+#include <stdlib.h>    /* random() */
+#include <unistd.h>    /* syscall() */
 
 #if defined(__linux__)
-#include <sys/syscall.h>  /* SYS_getrandom */
+#include <sys/syscall.h> /* SYS_getrandom */
 #endif
 
 #ifdef USE_OPENSSL
-#include <openssl/sha.h>  /* SHA_DIGEST_LENGTH */
+#include <openssl/sha.h> /* SHA_DIGEST_LENGTH */
 #else
 #include "sha1.h"
 #endif
 
-#include "export.h"       /* EXPORT */
-#include "mktorrent.h"    /* struct metafile */
+#include "export.h"    /* EXPORT */
+#include "mktorrent.h" /* struct metafile */
 #include "output.h"
 
 /* the torrent format fixes piece digests at 20 bytes (SHA-1) */
-static_assert(SHA_DIGEST_LENGTH == 20,
-	"piece digests must be 20-byte SHA-1 hashes");
+static_assert(SHA_DIGEST_LENGTH == 20, "piece digests must be 20-byte SHA-1 hashes");
 
 
 /*
@@ -62,7 +61,6 @@ static void get_random_bytes(unsigned char *buf, size_t len)
 }
 
 
-
 /*
  * write announce list
  */
@@ -71,18 +69,18 @@ static void write_announce_list(FILE *f, struct ll *list)
 	/* the announce list is a list of lists of urls */
 	fprintf(f, "13:announce-listl");
 	/* go through them all.. */
-	LL_FOR(tier_node, list) {
+	LL_FOR(tier_node, list)
+	{
 
 		/* .. and print the lists */
 		fprintf(f, "l");
 
-		LL_FOR(announce_url_node, LL_DATA_AS(tier_node, struct ll*)) {
+		LL_FOR(announce_url_node, LL_DATA_AS(tier_node, struct ll *))
+		{
 
-			const char *announce_url =
-				LL_DATA_AS(announce_url_node, const char*);
+			const char *announce_url = LL_DATA_AS(announce_url_node, const char *);
 
-			fprintf(f, "%lu:%s",
-					(unsigned long) strlen(announce_url), announce_url);
+			fprintf(f, "%lu:%s", (unsigned long)strlen(announce_url), announce_url);
 		}
 
 		fprintf(f, "e");
@@ -100,8 +98,9 @@ static void write_file_list(FILE *f, struct ll *list)
 	fprintf(f, "5:filesl");
 
 	/* go through all the files */
-	LL_FOR(file_node, list) {
-		struct file_data *fd = LL_DATA_AS(file_node, struct file_data*);
+	LL_FOR(file_node, list)
+	{
+		struct file_data *fd = LL_DATA_AS(file_node, struct file_data *);
 
 		/* the file list contains a dictionary for every file
 		   with entries for the length and path
@@ -141,10 +140,10 @@ static void write_web_seed_list(FILE *f, struct ll *list)
 	/* print the entry and start the list */
 	fprintf(f, "8:url-listl");
 	/* go through the list and write each URL */
-	LL_FOR(node, list) {
-		const char *web_seed_url = LL_DATA_AS(node, const char*);
-		fprintf(f, "%lu:%s",
-			(unsigned long) strlen(web_seed_url), web_seed_url);
+	LL_FOR(node, list)
+	{
+		const char *web_seed_url = LL_DATA_AS(node, const char *);
+		fprintf(f, "%lu:%s", (unsigned long)strlen(web_seed_url), web_seed_url);
 	}
 	/* end the list */
 	fprintf(f, "e");
@@ -165,15 +164,13 @@ EXPORT void write_metainfo(FILE *f, struct metafile *m, unsigned char *hash_stri
 
 	if (!LL_IS_EMPTY(m->announce_list)) {
 
-		struct ll *first_tier =
-			LL_DATA_AS(LL_HEAD(m->announce_list), struct ll*);
+		struct ll *first_tier = LL_DATA_AS(LL_HEAD(m->announce_list), struct ll *);
 
 		/* write the announce URL */
-		const char *first_announce_url
-			= LL_DATA_AS(LL_HEAD(first_tier), const char*);
+		const char *first_announce_url = LL_DATA_AS(LL_HEAD(first_tier), const char *);
 
-		fprintf(f, "8:announce%lu:%s",
-			(unsigned long) strlen(first_announce_url), first_announce_url);
+		fprintf(f, "8:announce%lu:%s", (unsigned long)strlen(first_announce_url),
+			first_announce_url);
 
 		/* write the announce-list entry if we have
 		 * more than one announce URL, namely
@@ -186,30 +183,24 @@ EXPORT void write_metainfo(FILE *f, struct metafile *m, unsigned char *hash_stri
 
 	/* add the comment if one is specified */
 	if (m->comment != NULL)
-		fprintf(f, "7:comment%lu:%s",
-				(unsigned long)strlen(m->comment),
-				m->comment);
+		fprintf(f, "7:comment%lu:%s", (unsigned long)strlen(m->comment), m->comment);
 	/* I made this! */
 	if (m->created_by != NULL)
-		fprintf(f, "10:created by%lu:%s",
-				(unsigned long)strlen(m->created_by),
-				m->created_by);
+		fprintf(f, "10:created by%lu:%s", (unsigned long)strlen(m->created_by),
+			m->created_by);
 	else
 		fprintf(f, "10:created by%lu:mktorrent %s",
-				(unsigned long)(strlen("mktorrent ") + strlen(VERSION)),
-				VERSION);
+			(unsigned long)(strlen("mktorrent ") + strlen(VERSION)), VERSION);
 	/* add the creation date */
 	if (!m->no_creation_date)
-		fprintf(f, "13:creation datei%lde",
-			(long)time(NULL));
+		fprintf(f, "13:creation datei%lde", (long)time(NULL));
 
 	if (m->publisher)
-		fprintf(f, "9:publisher%lu:%s",
-			(unsigned long) strlen(m->publisher), m->publisher);
+		fprintf(f, "9:publisher%lu:%s", (unsigned long)strlen(m->publisher), m->publisher);
 
 	if (m->publisher_url)
-		fprintf(f, "13:publisher-url%lu:%s",
-			(unsigned long) strlen(m->publisher_url), m->publisher_url);
+		fprintf(f, "13:publisher-url%lu:%s", (unsigned long)strlen(m->publisher_url),
+			m->publisher_url);
 
 	/* now here comes the info section
 	   it is yet another dictionary */
@@ -218,7 +209,7 @@ EXPORT void write_metainfo(FILE *f, struct metafile *m, unsigned char *hash_stri
 	   single file torrent, or a list of files and their respective sizes */
 	if (!m->target_is_directory)
 		fprintf(f, "6:lengthi%" PRIuMAX "e",
-			LL_DATA_AS(LL_HEAD(m->file_list), struct file_data*)->size);
+			LL_DATA_AS(LL_HEAD(m->file_list), struct file_data *)->size);
 	else
 		write_file_list(f, m->file_list);
 
@@ -232,8 +223,7 @@ EXPORT void write_metainfo(FILE *f, struct metafile *m, unsigned char *hash_stri
 
 		/* the length prefix is the prefix string plus 2 hex digits per byte */
 		fprintf(f, "12:x_cross_seed%u:%s",
-			(unsigned)(sizeof(prefix) - 1 + 2 * sizeof(rand_buf)),
-			prefix);
+			(unsigned)(sizeof(prefix) - 1 + 2 * sizeof(rand_buf)), prefix);
 		for (i = 0; i < sizeof(rand_buf); i++) {
 			fputc(hex[rand_buf[i] >> 4], f);
 			fputc(hex[rand_buf[i] & 0x0F], f);
@@ -242,9 +232,9 @@ EXPORT void write_metainfo(FILE *f, struct metafile *m, unsigned char *hash_stri
 
 	/* the info section also contains the name of the torrent,
 	   the piece length and the hash string */
-	fprintf(f, "4:name%lu:%s12:piece lengthi%ue6:pieces%u:",
-		(unsigned long)strlen(m->torrent_name), m->torrent_name,
-		m->piece_length, m->pieces * SHA_DIGEST_LENGTH);
+	fprintf(
+	    f, "4:name%lu:%s12:piece lengthi%ue6:pieces%u:", (unsigned long)strlen(m->torrent_name),
+	    m->torrent_name, m->piece_length, m->pieces * SHA_DIGEST_LENGTH);
 	fwrite(hash_string, 1, m->pieces * SHA_DIGEST_LENGTH, f);
 
 	/* set the private flag */
@@ -252,8 +242,7 @@ EXPORT void write_metainfo(FILE *f, struct metafile *m, unsigned char *hash_stri
 		fprintf(f, "7:privatei1e");
 
 	if (m->source)
-		fprintf(f, "6:source%lu:%s",
-			(unsigned long) strlen(m->source), m->source);
+		fprintf(f, "6:source%lu:%s", (unsigned long)strlen(m->source), m->source);
 
 	/* end the info section */
 	fprintf(f, "e");
@@ -262,10 +251,10 @@ EXPORT void write_metainfo(FILE *f, struct metafile *m, unsigned char *hash_stri
 	if (!LL_IS_EMPTY(m->web_seed_list)) {
 		if (LL_IS_SINGLETON(m->web_seed_list)) {
 			const char *first_web_seed =
-				LL_DATA_AS(LL_HEAD(m->web_seed_list), const char*);
+			    LL_DATA_AS(LL_HEAD(m->web_seed_list), const char *);
 
-			fprintf(f, "8:url-list%lu:%s",
-					(unsigned long) strlen(first_web_seed), first_web_seed);
+			fprintf(f, "8:url-list%lu:%s", (unsigned long)strlen(first_web_seed),
+				first_web_seed);
 		} else
 			write_web_seed_list(f, m->web_seed_list);
 	}

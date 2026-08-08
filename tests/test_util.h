@@ -22,7 +22,6 @@ void test_free_file_data(void *data);
 char *test_write_temp_file(const unsigned char *content, size_t len);
 
 /* byte-string search over binary data */
-size_t test_find_bytes(const unsigned char *buf, size_t n,
-		const unsigned char *needle, size_t m);
+size_t test_find_bytes(const unsigned char *buf, size_t n, const unsigned char *needle, size_t m);
 
 #endif /* MKTORRENT_TEST_UTIL_H */

@@ -1,0 +1,31 @@
+# Best-practice clang-format configuration for mktorrent (C, built as C23)
+#
+# Style: K&R braces, 8-column tab indentation, 100-column limit.
+
+BasedOnStyle: LLVM
+
+# 8-column tab indentation
+IndentWidth: 8
+TabWidth: 8
+UseTab: Always
+
+# K&R braces: attach to control statements, break before function bodies
+BreakBeforeBraces: Linux
+
+# empty function bodies stay on their own lines
+AllowShortFunctionsOnASingleLine: Empty
+
+# 100-column limit
+ColumnLimit: 100
+
+# the project uses a double blank line after the license header and between
+# sections
+MaxEmptyLinesToKeep: 2
+
+# include order is significant in this project: "export.h" must precede
+# "mktorrent.h" (which uses the EXPORT macro), and tests/test_init.c
+# #includes "init.c" between #define static / #undef static. Never reorder.
+SortIncludes: Never
+
+# keep comment text as written, do not reflow/wrap
+ReflowComments: false

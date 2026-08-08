@@ -27,8 +27,7 @@ static struct metafile make_empty_metafile(void)
 	return m;
 }
 
-static void sha1_of(const unsigned char *msg, size_t len,
-		unsigned char digest[SHA_DIGEST_LENGTH])
+static void sha1_of(const unsigned char *msg, size_t len, unsigned char digest[SHA_DIGEST_LENGTH])
 {
 	SHA_CTX ctx;
 
@@ -41,7 +40,7 @@ void test_hash_single_piece(void)
 {
 	struct metafile m = make_empty_metafile();
 	char *path = test_write_temp_file((const unsigned char *)"abc", 3);
-	struct file_data fd = { path, 3 };
+	struct file_data fd = {path, 3};
 	unsigned char expected[SHA_DIGEST_LENGTH];
 
 	TEST_ASSERT_NOT_NULL(path);
@@ -93,8 +92,7 @@ void test_hash_two_pieces_single_file(void)
 
 	/* second (short) piece covers the trailing "abc" */
 	sha1_of((const unsigned char *)"abc", 3, expected);
-	TEST_ASSERT_EQUAL_MEMORY(expected, hash + SHA_DIGEST_LENGTH,
-			SHA_DIGEST_LENGTH);
+	TEST_ASSERT_EQUAL_MEMORY(expected, hash + SHA_DIGEST_LENGTH, SHA_DIGEST_LENGTH);
 
 	free(hash);
 	free(content);
@@ -138,8 +136,7 @@ void test_hash_spanning_files(void)
 	TEST_ASSERT_EQUAL_MEMORY(expected, hash, SHA_DIGEST_LENGTH);
 
 	sha1_of((const unsigned char *)"abc", 3, expected);
-	TEST_ASSERT_EQUAL_MEMORY(expected, hash + SHA_DIGEST_LENGTH,
-			SHA_DIGEST_LENGTH);
+	TEST_ASSERT_EQUAL_MEMORY(expected, hash + SHA_DIGEST_LENGTH, SHA_DIGEST_LENGTH);
 
 	free(hash);
 	free(content1);
@@ -194,8 +191,7 @@ void test_hash_spanning_three_files(void)
 
 	/* piece 2 is entirely inside file3 */
 	sha1_of((const unsigned char *)"defg", 4, expected);
-	TEST_ASSERT_EQUAL_MEMORY(expected, hash + SHA_DIGEST_LENGTH,
-			SHA_DIGEST_LENGTH);
+	TEST_ASSERT_EQUAL_MEMORY(expected, hash + SHA_DIGEST_LENGTH, SHA_DIGEST_LENGTH);
 
 	free(hash);
 	free(content1);

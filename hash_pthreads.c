@@ -18,20 +18,20 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
 */
 
 
-#include <stdlib.h>       /* exit(), malloc() */
-#include <sys/types.h>    /* off_t */
-#include <errno.h>        /* errno */
-#include <string.h>       /* strerror() */
-#include <stdio.h>        /* printf() etc. */
-#include <fcntl.h>        /* open() */
-#include <unistd.h>       /* read(), close() */
-#include <inttypes.h>     /* PRId64 etc. */
+#include <stdlib.h>    /* exit(), malloc() */
+#include <sys/types.h> /* off_t */
+#include <errno.h>     /* errno */
+#include <string.h>    /* strerror() */
+#include <stdio.h>     /* printf() etc. */
+#include <fcntl.h>     /* open() */
+#include <unistd.h>    /* read(), close() */
+#include <inttypes.h>  /* PRId64 etc. */
 #include <pthread.h>
-#include <time.h>         /* nanosleep() */
+#include <time.h> /* nanosleep() */
 
 #ifdef USE_OPENSSL
-#include <openssl/evp.h>  /* EVP_MD_CTX */
-#include <openssl/sha.h>  /* SHA_DIGEST_LENGTH */
+#include <openssl/evp.h> /* EVP_MD_CTX */
+#include <openssl/sha.h> /* SHA_DIGEST_LENGTH */
 #else
 #include "sha1.h"
 #endif
@@ -225,8 +225,8 @@ static void *worker(void *data)
 
 static void read_files(struct metafile *m, struct queue *q, unsigned char *pos)
 {
-	int fd;                /* file descriptor */
-	size_t r = 0;          /* number of bytes read from file(s)
+	int fd;	      /* file descriptor */
+	size_t r = 0; /* number of bytes read from file(s)
 	                          into the read buffer */
 #ifndef NO_HASH_CHECK
 	uintmax_t counter = 0; /* number of bytes hashed
@@ -235,18 +235,18 @@ static void read_files(struct metafile *m, struct queue *q, unsigned char *pos)
 	struct piece *p = get_free(q, m->piece_length);
 
 	/* go through all the files in the file list */
-	LL_FOR(file_node, m->file_list) {
-		struct file_data *f = LL_DATA_AS(file_node, struct file_data*);
+	LL_FOR(file_node, m->file_list)
+	{
+		struct file_data *f = LL_DATA_AS(file_node, struct file_data *);
 
 		/* open the current file for reading */
 		FATAL_IF((fd = open(f->path, OPENFLAGS)) == -1,
-			"cannot open '%s' for reading: %s\n", f->path, strerror(errno));
+			 "cannot open '%s' for reading: %s\n", f->path, strerror(errno));
 
 		while (1) {
 			ssize_t d = read(fd, p->data + r, m->piece_length - r);
 
-			FATAL_IF(d < 0, "cannot read from '%s': %s\n",
-				f->path, strerror(errno));
+			FATAL_IF(d < 0, "cannot read from '%s': %s\n", f->path, strerror(errno));
 
 			if (d == 0) /* end of file */
 				break;
@@ -267,8 +267,7 @@ static void read_files(struct metafile *m, struct queue *q, unsigned char *pos)
 		}
 
 		/* now close the file */
-		FATAL_IF(close(fd), "cannot close '%s': %s\n",
-			f->path, strerror(errno));
+		FATAL_IF(close(fd), "cannot close '%s': %s\n", f->path, strerror(errno));
 	}
 
 	/* finally append the hash of the last irregular piece to the hash string */
@@ -282,23 +281,23 @@ static void read_files(struct metafile *m, struct queue *q, unsigned char *pos)
 #ifndef NO_HASH_CHECK
 	counter += r;
 	FATAL_IF(counter != m->size,
-		"counted %" PRIuMAX " bytes, but hashed %" PRIuMAX " bytes; "
-		"something is wrong...\n",
-			m->size, counter);
+		 "counted %" PRIuMAX " bytes, but hashed %" PRIuMAX " bytes; "
+		 "something is wrong...\n",
+		 m->size, counter);
 #endif
 }
 
 EXPORT unsigned char *make_hash(struct metafile *m)
 {
 	struct queue q = {
-		.mutex_free  = PTHREAD_MUTEX_INITIALIZER,
-		.mutex_full  = PTHREAD_MUTEX_INITIALIZER,
-		.cond_empty  = PTHREAD_COND_INITIALIZER,
-		.cond_full   = PTHREAD_COND_INITIALIZER,
+	    .mutex_free = PTHREAD_MUTEX_INITIALIZER,
+	    .mutex_full = PTHREAD_MUTEX_INITIALIZER,
+	    .cond_empty = PTHREAD_COND_INITIALIZER,
+	    .cond_full = PTHREAD_COND_INITIALIZER,
 	};
-	pthread_t print_progress_thread;	/* progress printer thread */
+	pthread_t print_progress_thread; /* progress printer thread */
 	pthread_t *workers;
-	unsigned char *hash_string;		/* the hash string */
+	unsigned char *hash_string; /* the hash string */
 	int i;
 	int err;
 

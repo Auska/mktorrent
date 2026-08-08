@@ -18,13 +18,13 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
 */
 
 
-#include <stdlib.h>      /* exit(), srandom() */
-#include <errno.h>       /* errno */
-#include <string.h>      /* strerror() */
-#include <stdio.h>       /* printf() etc. */
-#include <sys/stat.h>    /* S_IRUSR, S_IWUSR, S_IRGRP, S_IROTH */
-#include <fcntl.h>       /* open() */
-#include <time.h>        /* clock_gettime() */
+#include <stdlib.h>   /* exit(), srandom() */
+#include <errno.h>    /* errno */
+#include <string.h>   /* strerror() */
+#include <stdio.h>    /* printf() etc. */
+#include <sys/stat.h> /* S_IRUSR, S_IWUSR, S_IRGRP, S_IROTH */
+#include <fcntl.h>    /* open() */
+#include <time.h>     /* clock_gettime() */
 
 #include "export.h"
 #include "mktorrent.h"
@@ -76,7 +76,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
  */
 static FILE *open_file(const char *path, int force)
 {
-	int fd;  /* file descriptor */
+	int fd;	 /* file descriptor */
 	FILE *f; /* file stream */
 
 	int flags = O_WRONLY | O_BINARY | O_CREAT;
@@ -89,8 +89,7 @@ static FILE *open_file(const char *path, int force)
 
 	/* create the stream from this filedescriptor */
 	f = fdopen(fd, "wb");
-	FATAL_IF(f == NULL, "cannot create stream for '%s': %s\n",
-		path, strerror(errno));
+	FATAL_IF(f == NULL, "cannot create stream for '%s': %s\n", path, strerror(errno));
 
 	return f;
 }
@@ -109,43 +108,41 @@ static void close_file(FILE *f)
  */
 int main(int argc, char *argv[])
 {
-	FILE *file;	/* stream for writing to the metainfo file */
-	struct metafile m = {
-		/* options */
-		.piece_length = 0,    /* 0 means the length is calculated automatically */
-		.announce_list = NULL,
-		.comment = NULL,
-		.created_by = NULL,
-		.publisher = NULL,
-		.publisher_url = NULL,
-		.torrent_name = NULL,
-		.metainfo_file_path = NULL,
-		.web_seed_list = NULL,
-		.target_is_directory = 0,
-		.no_creation_date = 0,
-		.private = 0,
-		.source = NULL,
-		.cross_seed = 0,
-		.verbose = 0,
-		.force_overwrite = 0,
-		.exclude_list = NULL,
+	FILE *file;				/* stream for writing to the metainfo file */
+	struct metafile m = {			/* options */
+			     .piece_length = 0, /* 0 means the length is calculated automatically */
+			     .announce_list = NULL,
+			     .comment = NULL,
+			     .created_by = NULL,
+			     .publisher = NULL,
+			     .publisher_url = NULL,
+			     .torrent_name = NULL,
+			     .metainfo_file_path = NULL,
+			     .web_seed_list = NULL,
+			     .target_is_directory = 0,
+			     .no_creation_date = 0,
+			     .private = 0,
+			     .source = NULL,
+			     .cross_seed = 0,
+			     .verbose = 0,
+			     .force_overwrite = 0,
+			     .exclude_list = NULL,
 #ifdef USE_PTHREADS
-		.threads = 0,         /* initialised by init() */
+			     .threads = 0, /* initialised by init() */
 #endif
 
-		/* information calculated by read_dir() */
-		.size = 0,
-		.file_list = NULL,
-		.pieces = 0
-	};
+			     /* information calculated by read_dir() */
+			     .size = 0,
+			     .file_list = NULL,
+			     .pieces = 0};
 
 	/* print who we are */
 	printf("mktorrent " VERSION " (c) 2007, 2009 Emil Renner Berthing\n\n");
 
 	/* seed PRNG with current time */
 	struct timespec ts;
-	FATAL_IF(clock_gettime(CLOCK_REALTIME, &ts) == -1,
-		"failed to get time: %s\n", strerror(errno));
+	FATAL_IF(clock_gettime(CLOCK_REALTIME, &ts) == -1, "failed to get time: %s\n",
+		 strerror(errno));
 	srandom(ts.tv_nsec ^ ts.tv_sec);
 
 	/* process options */

@@ -89,13 +89,13 @@ static struct metafile make_metafile(void)
 	return m;
 }
 
-static void assert_basenames(struct metafile *m, const char *const *expected,
-		unsigned int n)
+static void assert_basenames(struct metafile *m, const char *const *expected, unsigned int n)
 {
 	unsigned int i = 0;
 
 	ll_sort(m->file_list, cmp_file_data_name);
-	LL_FOR(node, m->file_list) {
+	LL_FOR(node, m->file_list)
+	{
 		struct file_data *fd = LL_DATA(node);
 		const char *base = strrchr(fd->path, '/');
 
@@ -111,7 +111,7 @@ void test_ftw_collects_tree(void)
 {
 	char root[] = "/tmp/mktorrent_ftw_XXXXXX";
 	struct metafile m;
-	const char *expected[] = { "a.txt", "b.txt", "c.bin" };
+	const char *expected[] = {"a.txt", "b.txt", "c.bin"};
 	uintmax_t total = 0;
 
 	TEST_ASSERT_NOT_NULL(mkdtemp(root));
@@ -124,7 +124,7 @@ void test_ftw_collects_tree(void)
 
 	/* the reported sizes must add up to 3 + 4 + 2 bytes */
 	LL_FOR(node, m.file_list)
-		total += LL_DATA_AS(node, struct file_data *)->size;
+	total += LL_DATA_AS(node, struct file_data *)->size;
 	TEST_ASSERT_EQUAL_UINT(9, total);
 
 	ll_free(m.file_list, test_free_file_data);
@@ -136,7 +136,7 @@ void test_ftw_exclude_pattern(void)
 {
 	char root[] = "/tmp/mktorrent_ftw_XXXXXX";
 	struct metafile m;
-	const char *expected[] = { "a.txt", "b.txt" };
+	const char *expected[] = {"a.txt", "b.txt"};
 
 	TEST_ASSERT_NOT_NULL(mkdtemp(root));
 	setup_tree(root);
@@ -157,7 +157,7 @@ void test_ftw_skips_symlinks(void)
 {
 	char root[] = "/tmp/mktorrent_ftw_XXXXXX";
 	struct metafile m;
-	const char *expected[] = { "real.txt" };
+	const char *expected[] = {"real.txt"};
 	char path[512];
 
 	TEST_ASSERT_NOT_NULL(mkdtemp(root));
@@ -193,8 +193,7 @@ void test_ftw_nonexistent_dir(void)
 	int r;
 
 	silence_stderr();
-	r = file_tree_walk("/nonexistent_mktorrent_test_dir", 10,
-			collect_files, &m);
+	r = file_tree_walk("/nonexistent_mktorrent_test_dir", 10, collect_files, &m);
 	restore_stderr();
 
 	/* the walk reports failure instead of crashing */

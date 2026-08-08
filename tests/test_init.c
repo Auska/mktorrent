@@ -84,10 +84,11 @@ void test_init_get_slist(void)
 {
 	char input[] = "a,b,c";
 	struct ll *list = get_slist(input);
-	const char *expected[] = { "a", "b", "c" };
+	const char *expected[] = {"a", "b", "c"};
 	unsigned int i = 0;
 
-	LL_FOR(node, list) {
+	LL_FOR(node, list)
+	{
 		TEST_ASSERT_TRUE(i < 3);
 		TEST_ASSERT_EQUAL_STRING(expected[i], (const char *)LL_DATA(node));
 		i++;
@@ -98,7 +99,8 @@ void test_init_get_slist(void)
 	char single[] = "only";
 	list = get_slist(single);
 	i = 0;
-	LL_FOR(node, list) {
+	LL_FOR(node, list)
+	{
 		TEST_ASSERT_TRUE(i < 1);
 		TEST_ASSERT_EQUAL_STRING("only", (const char *)LL_DATA(node));
 		i++;

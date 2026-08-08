@@ -2,10 +2,10 @@
 #define MKTORRENT_MKTORRENT_H
 
 #ifdef _WIN32
-#define DIRSEP      "\\"
+#define DIRSEP "\\"
 #define DIRSEP_CHAR '\\'
 #else
-#define DIRSEP      "/"
+#define DIRSEP "/"
 #define DIRSEP_CHAR '/'
 #endif
 
@@ -37,29 +37,29 @@ struct metafile {
 	/* options */
 	unsigned int piece_length; /* piece length */
 	struct ll *announce_list;  /* announce URLs */
-	char *comment;             /* optional comment */
-	char *created_by;          /* optional created by string */
-	char *publisher;           /* optional publisher string */
-	char *publisher_url;       /* optional publisher URL string */
+	char *comment;		   /* optional comment */
+	char *created_by;	   /* optional created by string */
+	char *publisher;	   /* optional publisher string */
+	char *publisher_url;	   /* optional publisher URL string */
 	const char *torrent_name;  /* name of torrent (name of directory) */
 	char *metainfo_file_path;  /* absolute path to the metainfo file */
 	struct ll *web_seed_list;  /* web seed URLs */
-	bool target_is_directory;   /* target is a directory */
-	bool no_creation_date;      /* don't write the creation date */
-	bool private;               /* set the private flag */
-	char *source;              /* set source for private trackers */
-	bool cross_seed;            /* ensure info hash is unique for easier cross-seeding */
-	bool verbose;               /* be verbose */
-	bool force_overwrite;       /* overwrite existing output file */
+	bool target_is_directory;  /* target is a directory */
+	bool no_creation_date;	   /* don't write the creation date */
+	bool private;		   /* set the private flag */
+	char *source;		   /* set source for private trackers */
+	bool cross_seed;	   /* ensure info hash is unique for easier cross-seeding */
+	bool verbose;		   /* be verbose */
+	bool force_overwrite;	   /* overwrite existing output file */
 	struct ll *exclude_list;   /* exclude list */
 #ifdef USE_PTHREADS
-	long threads;              /* number of threads used for hashing */
+	long threads; /* number of threads used for hashing */
 #endif
 
 	/* information calculated by read_dir() */
-	uintmax_t size;              /* combined size of all files */
-	struct ll *file_list;      /* list of files and their sizes */
-	unsigned int pieces;       /* number of pieces */
+	uintmax_t size;	      /* combined size of all files */
+	struct ll *file_list; /* list of files and their sizes */
+	unsigned int pieces;  /* number of pieces */
 };
 
 #endif /* MKTORRENT_MKTORRENT_H */

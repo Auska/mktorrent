@@ -18,17 +18,17 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
 */
 
 
-#include <stdlib.h>       /* exit() */
-#include <errno.h>        /* errno */
-#include <string.h>       /* strerror() */
-#include <stdio.h>        /* printf() etc. */
-#include <fcntl.h>        /* open() */
-#include <unistd.h>       /* read(), close() */
-#include <inttypes.h>     /* PRId64 etc. */
+#include <stdlib.h>   /* exit() */
+#include <errno.h>    /* errno */
+#include <string.h>   /* strerror() */
+#include <stdio.h>    /* printf() etc. */
+#include <fcntl.h>    /* open() */
+#include <unistd.h>   /* read(), close() */
+#include <inttypes.h> /* PRId64 etc. */
 
 #ifdef USE_OPENSSL
-#include <openssl/evp.h>  /* EVP_MD_CTX */
-#include <openssl/sha.h>  /* SHA_DIGEST_LENGTH */
+#include <openssl/evp.h> /* EVP_MD_CTX */
+#include <openssl/sha.h> /* SHA_DIGEST_LENGTH */
 #else
 #include "sha1.h"
 #endif
@@ -50,8 +50,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
 #endif
 
 /* the torrent format fixes piece digests at 20 bytes (SHA-1) */
-static_assert(SHA_DIGEST_LENGTH == 20,
-	"piece digests must be 20-byte SHA-1 hashes");
+static_assert(SHA_DIGEST_LENGTH == 20, "piece digests must be 20-byte SHA-1 hashes");
 
 
 /*
@@ -62,19 +61,19 @@ static_assert(SHA_DIGEST_LENGTH == 20,
  */
 EXPORT unsigned char *make_hash(struct metafile *m)
 {
-	unsigned char *hash_string;     /* the hash string */
-	unsigned char *pos;             /* position in the hash string */
-	unsigned char *read_buf;        /* read buffer */
-	int fd;                         /* file descriptor */
-	size_t r;                       /* number of bytes read from file(s) into
+	unsigned char *hash_string; /* the hash string */
+	unsigned char *pos;	    /* position in the hash string */
+	unsigned char *read_buf;    /* read buffer */
+	int fd;			    /* file descriptor */
+	size_t r;		    /* number of bytes read from file(s) into
 	                                   the read buffer */
 #ifdef USE_OPENSSL
-	EVP_MD_CTX *ctx;                /* EVP hashing context */
+	EVP_MD_CTX *ctx; /* EVP hashing context */
 #else
-	SHA_CTX c;                      /* SHA1 hashing context */
+	SHA_CTX c; /* SHA1 hashing context */
 #endif
 #ifndef NO_HASH_CHECK
-	uintmax_t counter = 0;          /* number of bytes hashed
+	uintmax_t counter = 0; /* number of bytes hashed
 	                                   should match size when done */
 #endif
 
@@ -97,12 +96,13 @@ EXPORT unsigned char *make_hash(struct metafile *m)
 	/* and initiate r to 0 since we haven't read anything yet */
 	r = 0;
 	/* go through all the files in the file list */
-	LL_FOR(file_node, m->file_list) {
-		struct file_data *f = LL_DATA_AS(file_node, struct file_data*);
+	LL_FOR(file_node, m->file_list)
+	{
+		struct file_data *f = LL_DATA_AS(file_node, struct file_data *);
 
 		/* open the current file for reading */
 		FATAL_IF((fd = open(f->path, OPENFLAGS)) == -1,
-			"cannot open '%s' for reading: %s\n", f->path, strerror(errno));
+			 "cannot open '%s' for reading: %s\n", f->path, strerror(errno));
 		printf("hashing %s\n", f->path);
 		fflush(stdout);
 
@@ -112,8 +112,7 @@ EXPORT unsigned char *make_hash(struct metafile *m)
 		   to the end of the file */
 		while (1) {
 			ssize_t d = read(fd, read_buf + r, m->piece_length - r);
-			FATAL_IF(d < 0, "cannot read from '%s': %s\n",
-				f->path, strerror(errno));
+			FATAL_IF(d < 0, "cannot read from '%s': %s\n", f->path, strerror(errno));
 
 			if (d == 0) /* end of file */
 				break;
@@ -132,15 +131,14 @@ EXPORT unsigned char *make_hash(struct metafile *m)
 #endif
 				pos += SHA_DIGEST_LENGTH;
 #ifndef NO_HASH_CHECK
-				counter += r;	/* r == piece_length */
+				counter += r; /* r == piece_length */
 #endif
 				r = 0;
 			}
 		}
 
 		/* now close the file */
-		FATAL_IF(close(fd), "cannot close '%s': %s\n",
-			f->path, strerror(errno));
+		FATAL_IF(close(fd), "cannot close '%s': %s\n", f->path, strerror(errno));
 	}
 
 	/* finally append the hash of the last irregular piece to the hash string */
@@ -163,9 +161,9 @@ EXPORT unsigned char *make_hash(struct metafile *m)
 #ifndef NO_HASH_CHECK
 	counter += r;
 	FATAL_IF(counter != m->size,
-		"counted %" PRIuMAX " bytes, but hashed %" PRIuMAX " bytes; "
-		"something is wrong...\n",
-			m->size, counter);
+		 "counted %" PRIuMAX " bytes, but hashed %" PRIuMAX " bytes; "
+		 "something is wrong...\n",
+		 m->size, counter);
 #endif
 
 	/* free the read buffer before we return */

@@ -10,7 +10,7 @@
 #include "sha1.h"
 
 static void digest_to_hex(const unsigned char digest[SHA_DIGEST_LENGTH],
-		char out[SHA_DIGEST_LENGTH * 2 + 1])
+			  char out[SHA_DIGEST_LENGTH * 2 + 1])
 {
 	unsigned int i;
 
@@ -18,8 +18,7 @@ static void digest_to_hex(const unsigned char digest[SHA_DIGEST_LENGTH],
 		sprintf(out + 2 * i, "%02x", digest[i]);
 }
 
-static void assert_sha1(const unsigned char *msg, size_t len,
-		const char *expected_hex)
+static void assert_sha1(const unsigned char *msg, size_t len, const char *expected_hex)
 {
 	SHA_CTX ctx;
 	unsigned char digest[SHA_DIGEST_LENGTH];
@@ -35,24 +34,21 @@ static void assert_sha1(const unsigned char *msg, size_t len,
 
 void test_sha1_empty_message(void)
 {
-	assert_sha1((const unsigned char *)"", 0,
-			"da39a3ee5e6b4b0d3255bfef95601890afd80709");
+	assert_sha1((const unsigned char *)"", 0, "da39a3ee5e6b4b0d3255bfef95601890afd80709");
 }
 
 void test_sha1_abc(void)
 {
-	assert_sha1((const unsigned char *)"abc", 3,
-			"a9993e364706816aba3e25717850c26c9cd0d89d");
+	assert_sha1((const unsigned char *)"abc", 3, "a9993e364706816aba3e25717850c26c9cd0d89d");
 }
 
 void test_sha1_two_block_message(void)
 {
 	/* 56 bytes, spans two 64-byte blocks */
-	static const char msg[] =
-		"abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq";
+	static const char msg[] = "abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq";
 
 	assert_sha1((const unsigned char *)msg, sizeof(msg) - 1,
-			"84983e441c3bd26ebaae4aa1f95129e5e54670f1");
+		    "84983e441c3bd26ebaae4aa1f95129e5e54670f1");
 }
 
 void test_sha1_million_a_incremental(void)

@@ -2,34 +2,39 @@
 #define MKTORRENT_LL_H
 
 struct ll_node {
-    struct ll_node *prev, *next;
+	struct ll_node *prev, *next;
 
-    size_t data_size;
-    void *data;
+	size_t data_size;
+	void *data;
 };
 
 struct ll {
-    struct ll_node head, *tail;
+	struct ll_node head, *tail;
 };
 
 typedef void (*ll_node_data_destructor)(void *);
-typedef int  (*ll_node_data_cmp)(const void *, const void *);
+typedef int (*ll_node_data_cmp)(const void *, const void *);
 
 
 #define LL_DATA(node) ((node)->data)
-#define LL_DATA_AS(node, type) ((type) LL_DATA(node))
+#define LL_DATA_AS(node, type) ((type)LL_DATA(node))
 #define LL_DATASIZE(node) ((node)->data_size)
 #define LL_PREV(node) ((node)->prev)
 #define LL_NEXT(node) ((node)->next)
 #define LL_STEP(node) ((node) = LL_NEXT(node))
 #define LL_STEP_PREV(node) ((node) = LL_PREV(node))
-#define LL_CLEAR_LINKS(node) do { LL_NEXT(node) = NULL; LL_PREV(node) = NULL; } while(0)
+#define LL_CLEAR_LINKS(node)                                                                       \
+	do {                                                                                       \
+		LL_NEXT(node) = NULL;                                                              \
+		LL_PREV(node) = NULL;                                                              \
+	} while (0)
 
 #define LL_HEAD(list) ((list)->head.next)
 #define LL_TAIL(list) ((list)->tail)
 #define LL_IS_EMPTY(list) (LL_HEAD(list) == NULL)
 #define LL_IS_SINGLETON(list) (!LL_IS_EMPTY(list) && LL_NEXT(LL_HEAD(list)) == NULL)
-#define LL_FOR_FROM_TO_STEP(node, from, to, step) for (struct ll_node *(node) = from; node != to; step(node))
+#define LL_FOR_FROM_TO_STEP(node, from, to, step)                                                  \
+	for (struct ll_node * (node) = from; node != to; step(node))
 #define LL_FOR(node, list) LL_FOR_FROM_TO_STEP(node, LL_HEAD(list), NULL, LL_STEP)
 #define LL_FOR_FROM(node, from) LL_FOR_FROM_TO_STEP(node, from, NULL, LL_STEP)
 

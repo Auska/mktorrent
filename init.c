@@ -18,19 +18,19 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
 */
 
 
-#include <stdlib.h>       /* exit() */
-#include <sys/types.h>    /* off_t */
-#include <errno.h>        /* errno */
-#include <string.h>       /* strerror() */
-#include <stdio.h>        /* perror(), printf() etc. */
-#include <sys/stat.h>     /* the stat structure */
-#include <unistd.h>       /* getopt(), getcwd(), sysconf() */
-#include <string.h>       /* strcmp(), strlen(), strncpy() */
-#include <strings.h>      /* strcasecmp() */
-#include <inttypes.h>     /* PRId64 etc. */
+#include <stdlib.h>    /* exit() */
+#include <sys/types.h> /* off_t */
+#include <errno.h>     /* errno */
+#include <string.h>    /* strerror() */
+#include <stdio.h>     /* perror(), printf() etc. */
+#include <sys/stat.h>  /* the stat structure */
+#include <unistd.h>    /* getopt(), getcwd(), sysconf() */
+#include <string.h>    /* strcmp(), strlen(), strncpy() */
+#include <strings.h>   /* strcasecmp() */
+#include <inttypes.h>  /* PRId64 etc. */
 
 #ifdef USE_LONG_OPTIONS
-#include <getopt.h>       /* getopt_long() */
+#include <getopt.h> /* getopt_long() */
 #endif
 
 #include "export.h"
@@ -39,7 +39,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
 #include "msg.h"
 
 #ifndef MAX_OPENFD
-#define MAX_OPENFD 100	/* Maximum number of file descriptors
+#define MAX_OPENFD                                                                                 \
+	100 /* Maximum number of file descriptors
 			   file_tree_walk() will open */
 #endif
 
@@ -73,8 +74,8 @@ static const char *path_basename(const char *s)
 
 static void set_absolute_file_path(struct metafile *m)
 {
-	char *string;		/* string to return */
-	size_t length = 32;	/* length of the string */
+	char *string;	    /* string to return */
+	size_t length = 32; /* length of the string */
 
 	/* if the file_path is already an absolute path just
 	   return that */
@@ -110,19 +111,16 @@ static void set_absolute_file_path(struct metafile *m)
 	/* if the metainfo file path isn't set */
 	if (m->metainfo_file_path == NULL) {
 		/* append <torrent name>.torrent to the working dir */
-		string =
-		    realloc(string, length + strlen(m->torrent_name) + 10);
+		string = realloc(string, length + strlen(m->torrent_name) + 10);
 		FATAL_IF0(string == NULL, "out of memory\n");
-		snprintf(string + length, strlen(m->torrent_name) + 10,
-			DIRSEP "%s.torrent", m->torrent_name);
+		snprintf(string + length, strlen(m->torrent_name) + 10, DIRSEP "%s.torrent",
+			 m->torrent_name);
 	} else {
 		/* otherwise append the torrent path to the working dir */
-		string =
-		    realloc(string,
-			    length + strlen(m->metainfo_file_path) + 2);
+		string = realloc(string, length + strlen(m->metainfo_file_path) + 2);
 		FATAL_IF0(string == NULL, "out of memory\n");
-		snprintf(string + length, strlen(m->metainfo_file_path) + 2,
-			DIRSEP "%s", m->metainfo_file_path);
+		snprintf(string + length, strlen(m->metainfo_file_path) + 2, DIRSEP "%s",
+			 m->metainfo_file_path);
 	}
 
 	m->metainfo_file_path = string;
@@ -165,36 +163,30 @@ static struct ll *get_slist(char *s)
  */
 static int is_dir(struct metafile *m, char *target)
 {
-	struct stat s;		/* stat structure for stat() to fill */
+	struct stat s; /* stat structure for stat() to fill */
 
 	/* stat the target */
-	FATAL_IF(stat(target, &s), "cannot stat '%s': %s\n",
-		target, strerror(errno));
+	FATAL_IF(stat(target, &s), "cannot stat '%s': %s\n", target, strerror(errno));
 
 	/* if it is a directory, just return 1 */
 	if (S_ISDIR(s.st_mode))
 		return 1;
 
 	/* if it isn't a regular file either, something is wrong.. */
-	FATAL_IF(!S_ISREG(s.st_mode),
-		"'%s' is neither a directory nor regular file\n", target);
+	FATAL_IF(!S_ISREG(s.st_mode), "'%s' is neither a directory nor regular file\n", target);
 
 	/* if it has negative size, something it wrong */
 	FATAL_IF(s.st_size < 0, "'%s' has negative size\n", target);
 
 	/* since we know the torrent is just a single file and we've
 	   already stat'ed it, we might as well set the file list */
-	struct file_data fd = {
-		strdup(target),
-		(uintmax_t) s.st_size
-	};
+	struct file_data fd = {strdup(target), (uintmax_t)s.st_size};
 
-	FATAL_IF0(
-		fd.path == NULL || ll_append(m->file_list, &fd, sizeof(fd)) == NULL,
-		"out of memory\n");
+	FATAL_IF0(fd.path == NULL || ll_append(m->file_list, &fd, sizeof(fd)) == NULL,
+		  "out of memory\n");
 
 	/* ..and size variable */
-	m->size = (uintmax_t) s.st_size;
+	m->size = (uintmax_t)s.st_size;
 
 	/* now return 0 since it isn't a directory */
 	return 0;
@@ -232,13 +224,10 @@ static int process_node(const char *path, const struct stat *sb, void *data)
 		printf("adding %s\n", path);
 
 	/* count the total size of the files */
-	m->size += (uintmax_t) sb->st_size;
+	m->size += (uintmax_t)sb->st_size;
 
 	/* create a new file list node for the file */
-	struct file_data fd = {
-		strdup(path),
-		(uintmax_t) sb->st_size
-	};
+	struct file_data fd = {strdup(path), (uintmax_t)sb->st_size};
 
 	if (fd.path == NULL || ll_append(m->file_list, &fd, sizeof(fd)) == NULL) {
 		fprintf(stderr, "fatal error: out of memory\n");
@@ -254,67 +243,67 @@ static int process_node(const char *path, const struct stat *sb, void *data)
 static void print_help()
 {
 	printf(
-	  "Usage: mktorrent [OPTIONS] <target directory or filename>\n\n"
-	  "Options:\n"
+	    "Usage: mktorrent [OPTIONS] <target directory or filename>\n\n"
+	    "Options:\n"
 #ifdef USE_LONG_OPTIONS
-	  "-a, --announce=<url>[,<url>]* : specify the full announce URLs\n"
-	  "                                additional -a adds backup trackers\n"
-	  "-b, --created-by=<name>       : set the created by string\n"
-	  "-c, --comment=<comment>       : add a comment to the metainfo\n"
-	  "-d, --no-date                 : don't write the creation date\n"
-	  "-e, --exclude=<pat>[,<pat>]*  : exclude files whose name matches the pattern <pat>\n"
-	  "                                see the man page glob(7)\n"
-	  "-f, --force                   : overwrite output file if it exists\n"
-	  "-h, --help                    : show this help screen\n"
-	  "-l, --piece-length=<n>        : set the piece length to 2^n bytes,\n"
-	  "                                default is calculated from the total size\n"
-	  "-n, --name=<name>             : set the name of the torrent\n"
-	  "                                default is the basename of the target\n"
-	  "-o, --output=<filename>       : set the path and filename of the created file\n"
-	  "                                default is <name>.torrent\n"
-	  "-p, --private                 : set the private flag\n"
-	  "-u, --publisher=<name>        : set the publisher string\n"
-	  "-i, --publisher-url=<url>     : set the publisher URL\n"
-	  "-s, --source=<source>         : add source string embedded in infohash\n"
+	    "-a, --announce=<url>[,<url>]* : specify the full announce URLs\n"
+	    "                                additional -a adds backup trackers\n"
+	    "-b, --created-by=<name>       : set the created by string\n"
+	    "-c, --comment=<comment>       : add a comment to the metainfo\n"
+	    "-d, --no-date                 : don't write the creation date\n"
+	    "-e, --exclude=<pat>[,<pat>]*  : exclude files whose name matches the pattern <pat>\n"
+	    "                                see the man page glob(7)\n"
+	    "-f, --force                   : overwrite output file if it exists\n"
+	    "-h, --help                    : show this help screen\n"
+	    "-l, --piece-length=<n>        : set the piece length to 2^n bytes,\n"
+	    "                                default is calculated from the total size\n"
+	    "-n, --name=<name>             : set the name of the torrent\n"
+	    "                                default is the basename of the target\n"
+	    "-o, --output=<filename>       : set the path and filename of the created file\n"
+	    "                                default is <name>.torrent\n"
+	    "-p, --private                 : set the private flag\n"
+	    "-u, --publisher=<name>        : set the publisher string\n"
+	    "-i, --publisher-url=<url>     : set the publisher URL\n"
+	    "-s, --source=<source>         : add source string embedded in infohash\n"
 #ifdef USE_PTHREADS
-	  "-t, --threads=<n>             : use <n> threads for calculating hashes\n"
-	  "                                default is the number of CPU cores\n"
+	    "-t, --threads=<n>             : use <n> threads for calculating hashes\n"
+	    "                                default is the number of CPU cores\n"
 #endif
-	  "-v, --verbose                 : be verbose\n"
-	  "-w, --web-seed=<url>[,<url>]* : add web seed URLs\n"
-	  "                                additional -w adds more URLs\n"
-	  "-x, --cross-seed              : ensure info hash is unique for easier cross-seeding\n"
+	    "-v, --verbose                 : be verbose\n"
+	    "-w, --web-seed=<url>[,<url>]* : add web seed URLs\n"
+	    "                                additional -w adds more URLs\n"
+	    "-x, --cross-seed              : ensure info hash is unique for easier cross-seeding\n"
 #else
-	  "-a <url>[,<url>]* : specify the full announce URLs\n"
-	  "                    additional -a adds backup trackers\n"
-	  "-b <name>         : set the created by string\n"
-	  "-c <comment>      : add a comment to the metainfo\n"
-	  "-d                : don't write the creation date\n"
-	  "-e <pat>[,<pat>]* : exclude files whose name matches the pattern <pat>\n"
-	  "                    see the man page glob(7)\n"
-	  "-f                : overwrite output file if it exists\n"
-	  "-h                : show this help screen\n"
-	  "-l <n>            : set the piece length to 2^n bytes,\n"
-	  "                    default is calculated from the total size\n"
-	  "-n <name>         : set the name of the torrent,\n"
-	  "                    default is the basename of the target\n"
-	  "-o <filename>     : set the path and filename of the created file\n"
-	  "                    default is <name>.torrent\n"
-	  "-p                : set the private flag\n"
-	  "-u <name>         : set the publisher string\n"
-	  "-i <url>          : set the publisher URL\n"
-	  "-s                : add source string embedded in infohash\n"
+	    "-a <url>[,<url>]* : specify the full announce URLs\n"
+	    "                    additional -a adds backup trackers\n"
+	    "-b <name>         : set the created by string\n"
+	    "-c <comment>      : add a comment to the metainfo\n"
+	    "-d                : don't write the creation date\n"
+	    "-e <pat>[,<pat>]* : exclude files whose name matches the pattern <pat>\n"
+	    "                    see the man page glob(7)\n"
+	    "-f                : overwrite output file if it exists\n"
+	    "-h                : show this help screen\n"
+	    "-l <n>            : set the piece length to 2^n bytes,\n"
+	    "                    default is calculated from the total size\n"
+	    "-n <name>         : set the name of the torrent,\n"
+	    "                    default is the basename of the target\n"
+	    "-o <filename>     : set the path and filename of the created file\n"
+	    "                    default is <name>.torrent\n"
+	    "-p                : set the private flag\n"
+	    "-u <name>         : set the publisher string\n"
+	    "-i <url>          : set the publisher URL\n"
+	    "-s                : add source string embedded in infohash\n"
 #ifdef USE_PTHREADS
-	  "-t <n>            : use <n> threads for calculating hashes\n"
-	  "                    default is the number of CPU cores\n"
+	    "-t <n>            : use <n> threads for calculating hashes\n"
+	    "                    default is the number of CPU cores\n"
 #endif
-	  "-v                : be verbose\n"
-	  "-w <url>[,<url>]* : add web seed URLs\n"
-	  "                    additional -w adds more URLs\n"
-	  "-x                : ensure info hash is unique for easier cross-seeding\n"
+	    "-v                : be verbose\n"
+	    "-w <url>[,<url>]* : add web seed URLs\n"
+	    "                    additional -w adds more URLs\n"
+	    "-x                : ensure info hash is unique for easier cross-seeding\n"
 #endif
-	  "\nPlease send bug reports, patches, feature requests, praise and\n"
-	  "general gossip about the program to: mktorrent@rudde.org\n");
+	    "\nPlease send bug reports, patches, feature requests, praise and\n"
+	    "general gossip about the program to: mktorrent@rudde.org\n");
 }
 
 /*
@@ -324,15 +313,16 @@ static void print_announce_list(struct ll *list)
 {
 	unsigned int tier = 1;
 
-	LL_FOR(node, list) {
+	LL_FOR(node, list)
+	{
 
 		struct ll *inner_list = LL_DATA(node);
 
-		printf("    %u : %s\n",
-			tier, LL_DATA_AS(LL_HEAD(inner_list), const char*));
+		printf("    %u : %s\n", tier, LL_DATA_AS(LL_HEAD(inner_list), const char *));
 
-		LL_FOR_FROM(inner_node, LL_NEXT(LL_HEAD(inner_list))) {
-			printf("        %s\n", LL_DATA_AS(inner_node, const char*));
+		LL_FOR_FROM(inner_node, LL_NEXT(LL_HEAD(inner_list)))
+		{
+			printf("        %s\n", LL_DATA_AS(inner_node, const char *));
 		}
 
 		tier += 1;
@@ -351,9 +341,10 @@ static void print_web_seed_list(struct ll *list)
 		return;
 	}
 
-	printf("%s\n", LL_DATA_AS(LL_HEAD(list), const char*));
-	LL_FOR_FROM(node, LL_NEXT(LL_HEAD(list))) {
-		printf("                %s\n", LL_DATA_AS(node, const char*));
+	printf("%s\n", LL_DATA_AS(LL_HEAD(list), const char *));
+	LL_FOR_FROM(node, LL_NEXT(LL_HEAD(list)))
+	{
+		printf("                %s\n", LL_DATA_AS(node, const char *));
 	}
 }
 
@@ -376,9 +367,10 @@ static void dump_options(struct metafile *m)
 	       "  Be verbose:   yes\n",
 	       m->torrent_name, m->metainfo_file_path, m->piece_length
 #ifdef USE_PTHREADS
-	       ,m->threads
+	       ,
+	       m->threads
 #endif
-	       );
+	);
 
 	printf("  Write date:   ");
 	if (m->no_creation_date)
@@ -424,44 +416,49 @@ static void free_inner_list(void *data)
  */
 EXPORT void init(struct metafile *m, int argc, char *argv[])
 {
-	int c;			/* return value of getopt() */
-	const uintmax_t piece_len_maxes[] = {
-		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-		(uintmax_t) BIT15MAX * ONEMEG, (uintmax_t) BIT16MAX * ONEMEG,
-		(uintmax_t) BIT17MAX * ONEMEG, (uintmax_t) BIT18MAX * ONEMEG,
-		(uintmax_t) BIT19MAX * ONEMEG, (uintmax_t) BIT20MAX * ONEMEG,
-		(uintmax_t) BIT21MAX * ONEMEG, (uintmax_t) BIT22MAX * ONEMEG,
-		(uintmax_t) BIT23MAX * ONEMEG
-	};
+	int c; /* return value of getopt() */
+	const uintmax_t piece_len_maxes[] = {0,
+					     0,
+					     0,
+					     0,
+					     0,
+					     0,
+					     0,
+					     0,
+					     0,
+					     0,
+					     0,
+					     0,
+					     0,
+					     0,
+					     0,
+					     (uintmax_t)BIT15MAX * ONEMEG,
+					     (uintmax_t)BIT16MAX * ONEMEG,
+					     (uintmax_t)BIT17MAX * ONEMEG,
+					     (uintmax_t)BIT18MAX * ONEMEG,
+					     (uintmax_t)BIT19MAX * ONEMEG,
+					     (uintmax_t)BIT20MAX * ONEMEG,
+					     (uintmax_t)BIT21MAX * ONEMEG,
+					     (uintmax_t)BIT22MAX * ONEMEG,
+					     (uintmax_t)BIT23MAX * ONEMEG};
 
-	const int num_piece_len_maxes = sizeof(piece_len_maxes) /
-	    sizeof(piece_len_maxes[0]);
+	const int num_piece_len_maxes = sizeof(piece_len_maxes) / sizeof(piece_len_maxes[0]);
 
 #ifdef USE_LONG_OPTIONS
 	/* the option structure to pass to getopt_long() */
 	static struct option long_options[] = {
-		{"announce", 1, NULL, 'a'},
-		{"comment", 1, NULL, 'c'},
-		{"created-by", 1, NULL, 'b'},
-		{"no-date", 0, NULL, 'd'},
-		{"exclude", 1, NULL, 'e'},
-		{"force", 0, NULL, 'f'},
-		{"help", 0, NULL, 'h'},
-		{"piece-length", 1, NULL, 'l'},
-		{"name", 1, NULL, 'n'},
-		{"output", 1, NULL, 'o'},
-		{"private", 0, NULL, 'p'},
-		{"publisher", 1, NULL, 'u'},
-		{"publisher-url", 1, NULL, 'i'},
-		{"source", 1, NULL, 's'},
+	    {"announce", 1, NULL, 'a'},	     {"comment", 1, NULL, 'c'},
+	    {"created-by", 1, NULL, 'b'},    {"no-date", 0, NULL, 'd'},
+	    {"exclude", 1, NULL, 'e'},	     {"force", 0, NULL, 'f'},
+	    {"help", 0, NULL, 'h'},	     {"piece-length", 1, NULL, 'l'},
+	    {"name", 1, NULL, 'n'},	     {"output", 1, NULL, 'o'},
+	    {"private", 0, NULL, 'p'},	     {"publisher", 1, NULL, 'u'},
+	    {"publisher-url", 1, NULL, 'i'}, {"source", 1, NULL, 's'},
 #ifdef USE_PTHREADS
-		{"threads", 1, NULL, 't'},
+	    {"threads", 1, NULL, 't'},
 #endif
-		{"verbose", 0, NULL, 'v'},
-		{"web-seed", 1, NULL, 'w'},
-		{"cross-seed", 0, NULL, 'x'},
-		{NULL, 0, NULL, 0}
-	};
+	    {"verbose", 0, NULL, 'v'},	     {"web-seed", 1, NULL, 'w'},
+	    {"cross-seed", 0, NULL, 'x'},    {NULL, 0, NULL, 0}};
 #endif
 
 	m->announce_list = ll_new();
@@ -483,17 +480,15 @@ EXPORT void init(struct metafile *m, int argc, char *argv[])
 #define OPT_STRING "a:b:c:e:dfhi:l:n:o:ps:u:vw:x"
 #endif
 #ifdef USE_LONG_OPTIONS
-	while ((c = getopt_long(argc, argv, OPT_STRING,
-				long_options, NULL)) != -1) {
+	while ((c = getopt_long(argc, argv, OPT_STRING, long_options, NULL)) != -1) {
 #else
 	while ((c = getopt(argc, argv, OPT_STRING)) != -1) {
 #endif
 #undef OPT_STRING
 		switch (c) {
 		case 'a':
-			FATAL_IF0(
-				ll_append(m->announce_list, get_slist(optarg), 0) == NULL,
-				"out of memory\n");
+			FATAL_IF0(ll_append(m->announce_list, get_slist(optarg), 0) == NULL,
+				  "out of memory\n");
 			break;
 		case 'b':
 			m->created_by = optarg;
@@ -554,14 +549,12 @@ EXPORT void init(struct metafile *m, int argc, char *argv[])
 	}
 
 	/* check that the user provided a file or directory from which to create the torrent */
-	FATAL_IF0(optind >= argc,
-		"must specify the contents, use -h for help\n");
+	FATAL_IF0(optind >= argc, "must specify the contents, use -h for help\n");
 
 #ifdef USE_PTHREADS
 	/* check the number of threads */
 	if (m->threads) {
-		FATAL_IF0(m->threads > 20,
-			"the number of threads is limited to at most 20\n");
+		FATAL_IF0(m->threads > 20, "the number of threads is limited to at most 20\n");
 	} else {
 #ifdef _SC_NPROCESSORS_ONLN
 		m->threads = sysconf(_SC_NPROCESSORS_ONLN);
@@ -590,8 +583,8 @@ EXPORT void init(struct metafile *m, int argc, char *argv[])
 	m->target_is_directory = is_dir(m, argv[optind]);
 	if (m->target_is_directory) {
 		/* change to the specified directory */
-		FATAL_IF(chdir(argv[optind]), "cannot change directory to '%s': %s\n",
-			argv[optind], strerror(errno));
+		FATAL_IF(chdir(argv[optind]), "cannot change directory to '%s': %s\n", argv[optind],
+			 strerror(errno));
 
 		if (file_tree_walk("." DIRSEP, MAX_OPENFD, process_node, m))
 			exit(EXIT_FAILURE);
@@ -603,8 +596,7 @@ EXPORT void init(struct metafile *m, int argc, char *argv[])
 	   it was not user specified. */
 	if (m->piece_length == 0) {
 		int i;
-		for (i = 15; i < num_piece_len_maxes &&
-			m->piece_length == 0; i++)
+		for (i = 15; i < num_piece_len_maxes && m->piece_length == 0; i++)
 			if (m->size <= piece_len_maxes[i])
 				m->piece_length = i;
 		if (m->piece_length == 0)
@@ -612,7 +604,7 @@ EXPORT void init(struct metafile *m, int argc, char *argv[])
 	} else {
 		/* if user did specify a piece length, verify its validity */
 		FATAL_IF0(m->piece_length < 15 || m->piece_length > 28,
-			"the piece length must be a number between 15 and 28.\n");
+			  "the piece length must be a number between 15 and 28.\n");
 	}
 
 	/* convert the piece length from power of 2 to an integer. */
@@ -625,8 +617,8 @@ EXPORT void init(struct metafile *m, int argc, char *argv[])
 	/* now print the size and piece count if we should be verbose */
 	if (m->verbose)
 		printf("\n%" PRIuMAX " bytes in all\n"
-			"that's %u pieces of %u bytes each\n\n",
-			m->size, m->pieces, m->piece_length);
+		       "that's %u pieces of %u bytes each\n\n",
+		       m->size, m->pieces, m->piece_length);
 }
 
 EXPORT void cleanup_metafile(struct metafile *m)

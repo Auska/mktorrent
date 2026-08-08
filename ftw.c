@@ -41,8 +41,7 @@ struct dir_state {
 	off_t offset;
 };
 
-static struct dir_state *dir_state_new(struct dir_state *prev,
-		struct dir_state *next)
+static struct dir_state *dir_state_new(struct dir_state *prev, struct dir_state *next)
 {
 	struct dir_state *ds = malloc(sizeof(struct dir_state));
 
@@ -57,13 +56,11 @@ static struct dir_state *dir_state_new(struct dir_state *prev,
 	return ds;
 }
 
-static unsigned int dir_state_open(struct dir_state *ds, const char *name,
-		size_t length)
+static unsigned int dir_state_open(struct dir_state *ds, const char *name, size_t length)
 {
 	ds->dir = opendir(name);
 	if (ds->dir == NULL) {
-		fprintf(stderr, "fatal error: cannot open '%s': %s\n",
-				name, strerror(errno));
+		fprintf(stderr, "fatal error: cannot open '%s': %s\n", name, strerror(errno));
 		return 1;
 	}
 
@@ -77,8 +74,7 @@ static unsigned int dir_state_reopen(struct dir_state *ds, char *name)
 	name[ds->length] = '\0';
 	ds->dir = opendir(name);
 	if (ds->dir == NULL) {
-		fprintf(stderr, "fatal error: cannot open '%s': %s\n",
-				name, strerror(errno));
+		fprintf(stderr, "fatal error: cannot open '%s': %s\n", name, strerror(errno));
 		return 1;
 	}
 
@@ -93,14 +89,12 @@ static unsigned int dir_state_close(struct dir_state *ds)
 {
 	ds->offset = telldir(ds->dir);
 	if (ds->offset < 0) {
-		fprintf(stderr, "fatal error: cannot obtain dir offset: %s\n",
-				strerror(errno));
+		fprintf(stderr, "fatal error: cannot obtain dir offset: %s\n", strerror(errno));
 		return 1;
 	}
 
 	if (closedir(ds->dir)) {
-		fprintf(stderr, "fatal error: cannot close directory: %s\n",
-				strerror(errno));
+		fprintf(stderr, "fatal error: cannot close directory: %s\n", strerror(errno));
 		return 1;
 	}
 
@@ -126,8 +120,8 @@ static unsigned int cleanup(struct dir_state *ds, char *path, int ret)
 	return ret;
 }
 
-EXPORT int file_tree_walk(const char *dirname, unsigned int nfds,
-		file_tree_walk_cb callback, void *data)
+EXPORT int file_tree_walk(const char *dirname, unsigned int nfds, file_tree_walk_cb callback,
+			  void *data)
 {
 	size_t path_size = 256;
 	char *path;
@@ -156,7 +150,7 @@ EXPORT int file_tree_walk(const char *dirname, unsigned int nfds,
 		if (end == path_max) {
 			char *new_path;
 
-			new_path = realloc(path, 2*path_size);
+			new_path = realloc(path, 2 * path_size);
 			if (new_path == NULL) {
 				fprintf(stderr, "fatal error: out of memory\n");
 				return cleanup(ds, path, -1);
@@ -169,7 +163,7 @@ EXPORT int file_tree_walk(const char *dirname, unsigned int nfds,
 	}
 
 	/* strip ending directory separators */
-	while (end > path && *(end-1) == DIRSEP_CHAR) {
+	while (end > path && *(end - 1) == DIRSEP_CHAR) {
 		end--;
 		*end = '\0';
 	}
@@ -190,15 +184,15 @@ EXPORT int file_tree_walk(const char *dirname, unsigned int nfds,
 			const char *p;
 			int r;
 
-			if (de->d_name[0] == '.'
-					&& (de->d_name[1] == '\0'
-					|| (de->d_name[1] == '.'
-					&& de->d_name[2] == '\0'))) {
+			if (de->d_name[0] == '.' &&
+			    (de->d_name[1] == '\0' ||
+			     (de->d_name[1] == '.' && de->d_name[2] == '\0'))) {
 				continue;
 			}
 
 			bool should_skip = false;
-			LL_FOR(exclude_node, m->exclude_list) {
+			LL_FOR(exclude_node, m->exclude_list)
+			{
 				const char *exclude_pattern = LL_DATA(exclude_node);
 				if (fnmatch(exclude_pattern, de->d_name, 0) != FNM_NOMATCH) {
 					should_skip = true;
@@ -220,7 +214,7 @@ EXPORT int file_tree_walk(const char *dirname, unsigned int nfds,
 				if (end == path_max) {
 					char *new_path;
 
-					new_path = realloc(path, 2*path_size);
+					new_path = realloc(path, 2 * path_size);
 					if (new_path == NULL) {
 						fprintf(stderr, "fatal error: out of memory\n");
 						return cleanup(ds, path, -1);
@@ -237,8 +231,8 @@ EXPORT int file_tree_walk(const char *dirname, unsigned int nfds,
 			   would hash the same content twice. The callback ignores
 			   non-regular files (S_ISLNK), so symlinks are skipped. */
 			if (lstat(path, &sbuf)) {
-				fprintf(stderr, "fatal error: cannot stat '%s': %s\n",
-						path, strerror(errno));
+				fprintf(stderr, "fatal error: cannot stat '%s': %s\n", path,
+					strerror(errno));
 				return cleanup(ds, path, -1);
 			}
 
@@ -248,7 +242,7 @@ EXPORT int file_tree_walk(const char *dirname, unsigned int nfds,
 
 			if (S_ISDIR(sbuf.st_mode)) {
 				if (ds->next == NULL &&
-					(ds->next = dir_state_new(ds, NULL)) == NULL)
+				    (ds->next = dir_state_new(ds, NULL)) == NULL)
 					return cleanup(ds, path, -1);
 
 				ds = ds->next;
@@ -270,8 +264,8 @@ EXPORT int file_tree_walk(const char *dirname, unsigned int nfds,
 		} else {
 			if (closedir(ds->dir)) {
 				path[ds->length] = '\0';
-				fprintf(stderr, "fatal error: cannot close '%s': %s\n",
-					path, strerror(errno));
+				fprintf(stderr, "fatal error: cannot close '%s': %s\n", path,
+					strerror(errno));
 				return cleanup(ds, path, -1);
 			}
 

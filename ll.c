@@ -59,11 +59,8 @@ EXPORT void ll_free(struct ll *list, ll_node_data_destructor destructor)
 	}
 }
 
-static struct ll_node *ll_node_new(
-	void *data,
-	const size_t data_size,
-	struct ll_node *prev,
-	struct ll_node *next)
+static struct ll_node *ll_node_new(void *data, const size_t data_size, struct ll_node *prev,
+				   struct ll_node *next)
 {
 	struct ll_node *node = calloc(1, sizeof(*node));
 
@@ -77,8 +74,7 @@ static struct ll_node *ll_node_new(
 			goto oom_node_data;
 
 		memcpy(LL_DATA(node), data, data_size);
-	}
-	else
+	} else
 		LL_DATA(node) = data;
 
 	LL_DATASIZE(node) = data_size;
@@ -135,18 +131,16 @@ EXPORT struct ll *ll_extend(struct ll *list, struct ll *other)
  * the new head will have ->prev = NULL,
  * and the new tail will have ->next = NULL;
  */
-static void ll_sort_node_range(
-	struct ll_node **first,
-	struct ll_node **last,
-	ll_node_data_cmp cmp)
+static void ll_sort_node_range(struct ll_node **first, struct ll_node **last, ll_node_data_cmp cmp)
 {
-#define APPEND_AND_STEP(t, x) do { \
-	LL_NEXT(t) = (x); \
-	LL_PREV(x) = (t); \
-	                  \
-	LL_STEP(x); \
-	LL_STEP(t); \
-} while(0)
+#define APPEND_AND_STEP(t, x)                                                                      \
+	do {                                                                                       \
+		LL_NEXT(t) = (x);                                                                  \
+		LL_PREV(x) = (t);                                                                  \
+                                                                                                   \
+		LL_STEP(x);                                                                        \
+		LL_STEP(t);                                                                        \
+	} while (0)
 
 	if (first == NULL || *first == NULL || last == NULL || *last == NULL)
 		return;
@@ -160,7 +154,7 @@ static void ll_sort_node_range(
 	struct ll_node *middle = *first, *middle2 = *last;
 
 	while (middle != middle2 && LL_NEXT(middle) != middle2) {
-		middle  = LL_NEXT(middle);
+		middle = LL_NEXT(middle);
 		middle2 = LL_PREV(middle2);
 	}
 
@@ -176,13 +170,15 @@ static void ll_sort_node_range(
 	 * so they can be safely overwritten by the recursive calls
 	 */
 	ll_sort_node_range(&a, &middle, cmp);
-	ll_sort_node_range(&b,    last, cmp);
+	ll_sort_node_range(&b, last, cmp);
 
 	while (a && b) {
 		int r = cmp(LL_DATA(a), LL_DATA(b));
 
-		if (r <= 0) APPEND_AND_STEP(tail, a); /* if a.val <= b.val, append a */
-		else        APPEND_AND_STEP(tail, b); /* otherwise,         append b */
+		if (r <= 0)
+			APPEND_AND_STEP(tail, a); /* if a.val <= b.val, append a */
+		else
+			APPEND_AND_STEP(tail, b); /* otherwise,         append b */
 	}
 
 	/* at this point only one of a or b might be non-NULL,
@@ -190,10 +186,12 @@ static void ll_sort_node_range(
 	 */
 
 	/* append remaining nodes from the first half */
-	while (a) APPEND_AND_STEP(tail, a);
+	while (a)
+		APPEND_AND_STEP(tail, a);
 
 	/* append remaining nodes from the second half */
-	while (b) APPEND_AND_STEP(tail, b);
+	while (b)
+		APPEND_AND_STEP(tail, b);
 
 	/* the prev ptr of the first "real" node points to dummy, clear that */
 	LL_PREV(LL_NEXT(&dummy)) = NULL;
