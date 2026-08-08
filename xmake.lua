@@ -15,7 +15,6 @@
 -- Options are re-applied with `xmake f --<option>=<value>` before building.
 
 set_project("mktorrent")
-set_version("V" .. os.date("%Y%m%d"))
 set_xmakever("2.8.6")
 
 option("pthreads")
@@ -93,7 +92,15 @@ target("mktorrent")
         if get_config("debug") then
             target:add("defines", "DEBUG")
         end
-        target:add("defines", 'VERSION="V' .. os.date("%Y%m%d") .. '"')
+
+        -- version from the latest git tag (e.g. "v1.1" or "v1.1-3-gabc1234"),
+        -- falling back to the short commit hash, or "unknown"
+        local out = os.iorun("git describe --tags --always --dirty", {try = true})
+        local version = "unknown"
+        if out and #out > 0 then
+            version = out:gsub("%s+$", "")
+        end
+        target:add("defines", 'VERSION="' .. version .. '"')
 
         -- source selection
         if get_config("allinone") then

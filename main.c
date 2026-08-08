@@ -137,7 +137,8 @@ int main(int argc, char *argv[])
 			     .pieces = 0};
 
 	/* print who we are */
-	printf("mktorrent " VERSION " (c) 2007, 2009 Emil Renner Berthing\n\n");
+	printf("mktorrent " VERSION " (c) 2007, 2009 Emil Renner Berthing\n"
+	       "Luodan <luodan0709@live.cn>\n\n");
 
 	/* seed PRNG with current time */
 	struct timespec ts;

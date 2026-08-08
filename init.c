@@ -305,7 +305,9 @@ static void print_help()
 	    "-x                : ensure info hash is unique for easier cross-seeding\n"
 #endif
 	    "\nPlease send bug reports, patches, feature requests, praise and\n"
-	    "general gossip about the program to: mktorrent@rudde.org\n");
+	    "general gossip about the program to:\n"
+	    "  mktorrent@rudde.org\n"
+	    "  Luodan <luodan0709@live.cn>\n");
 }
 
 /*

@@ -30,7 +30,7 @@ Feature flags (pass as `xmake f --<option>=<value>`, then rebuild). `--pthreads`
 | `--debug=y` | leftover debug code |
 | `--allinone=y` | single translation unit (`-DALLINONE`, main.c includes all .c files) |
 
-Version string is compiled in as `-DVERSION="VYYYYMMDD"`. When passing VERSION yourself, GCC needs the literal quotes spelling `-DVERSION="V..."`.
+Version string is compiled in from the latest git tag via `git describe --tags --always --dirty` (falls back to the short commit hash, or "unknown" outside a git checkout). When passing VERSION yourself, GCC needs the literal quotes spelling `-DVERSION="V..."`.
 
 ### Run
 
