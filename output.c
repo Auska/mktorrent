@@ -40,6 +40,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
 #include "mktorrent.h"    /* struct metafile */
 #include "output.h"
 
+/* the torrent format fixes piece digests at 20 bytes (SHA-1) */
+static_assert(SHA_DIGEST_LENGTH == 20,
+	"piece digests must be 20-byte SHA-1 hashes");
+
 
 /*
  * fill buf with len bytes of randomness. Prefer the operating system's

@@ -44,13 +44,13 @@ struct metafile {
 	const char *torrent_name;  /* name of torrent (name of directory) */
 	char *metainfo_file_path;  /* absolute path to the metainfo file */
 	struct ll *web_seed_list;  /* web seed URLs */
-	int target_is_directory;   /* target is a directory */
-	int no_creation_date;      /* don't write the creation date */
-	int private;               /* set the private flag */
+	bool target_is_directory;   /* target is a directory */
+	bool no_creation_date;      /* don't write the creation date */
+	bool private;               /* set the private flag */
 	char *source;              /* set source for private trackers */
-	int cross_seed;            /* ensure info hash is unique for easier cross-seeding */
-	int verbose;               /* be verbose */
-	int force_overwrite;       /* overwrite existing output file */
+	bool cross_seed;            /* ensure info hash is unique for easier cross-seeding */
+	bool verbose;               /* be verbose */
+	bool force_overwrite;       /* overwrite existing output file */
 	struct ll *exclude_list;   /* exclude list */
 #ifdef USE_PTHREADS
 	long threads;              /* number of threads used for hashing */

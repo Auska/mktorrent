@@ -81,7 +81,7 @@ struct queue {
 	unsigned int pieces;
 	/* read by the progress thread without holding any mutex */
 	_Atomic unsigned int pieces_hashed;
-	_Atomic int stop;
+	_Atomic bool stop;
 };
 
 static struct piece *get_free(struct queue *q, size_t piece_length)

@@ -49,6 +49,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
 #define OPENFLAGS (O_RDONLY | O_BINARY)
 #endif
 
+/* the torrent format fixes piece digests at 20 bytes (SHA-1) */
+static_assert(SHA_DIGEST_LENGTH == 20,
+	"piece digests must be 20-byte SHA-1 hashes");
+
 
 /*
  * go through the files in file_list, split their contents into pieces
