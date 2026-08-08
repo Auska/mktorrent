@@ -113,14 +113,16 @@ static void set_absolute_file_path(struct metafile *m)
 		string =
 		    realloc(string, length + strlen(m->torrent_name) + 10);
 		FATAL_IF0(string == NULL, "out of memory\n");
-		sprintf(string + length, DIRSEP "%s.torrent", m->torrent_name);
+		snprintf(string + length, strlen(m->torrent_name) + 10,
+			DIRSEP "%s.torrent", m->torrent_name);
 	} else {
 		/* otherwise append the torrent path to the working dir */
 		string =
 		    realloc(string,
 			    length + strlen(m->metainfo_file_path) + 2);
 		FATAL_IF0(string == NULL, "out of memory\n");
-		sprintf(string + length, DIRSEP "%s", m->metainfo_file_path);
+		snprintf(string + length, strlen(m->metainfo_file_path) + 2,
+			DIRSEP "%s", m->metainfo_file_path);
 	}
 
 	m->metainfo_file_path = string;
