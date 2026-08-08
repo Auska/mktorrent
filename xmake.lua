@@ -58,6 +58,11 @@ option("allinone")
     set_showmenu(true)
     set_description("Build a single translation unit via -DALLINONE")
 
+option("tests")
+    set_default(false)
+    set_showmenu(true)
+    set_description("Build the Unity unit tests (requires unity_test)")
+
 target("mktorrent")
     set_kind("binary")
     set_optimize("fast")
@@ -110,9 +115,37 @@ target("mktorrent")
         end
     end)
 
-    -- compiler warnings (POSIX toolchains)
+    -- compiler flags (POSIX toolchains): C23 (GNU dialect) + warnings
     if is_plat("windows") then
         add_cxflags("/W4")
     else
-        add_cxflags("-Wall", "-Wextra", "-Wpedantic")
+        add_cxflags("-std=gnu23", "-Wall", "-Wextra", "-Wpedantic")
     end
+target_end()
+
+if has_config("tests") then
+    add_requires("unity_test")
+
+    target("mktorrent-tests")
+        set_kind("binary")
+        set_optimize("fast")
+        add_includedirs(".")
+        add_packages("unity_test")
+        add_defines('VERSION="Vtest"')
+        add_files(
+            "tests/test_main.c",
+            "tests/test_ll.c",
+            "tests/test_sha1.c",
+            "tests/test_hash.c",
+            "tests/test_output.c",
+            "tests/test_ftw.c",
+            "tests/test_util.c")
+        -- library under test (main.c and init.c are not unit tested)
+        add_files("ll.c", "sha1.c", "msg.c", "hash.c", "output.c", "ftw.c")
+
+        if is_plat("windows") then
+            add_cxflags("/W4")
+        else
+            add_cxflags("-std=gnu23", "-Wall", "-Wextra", "-Wpedantic")
+        end
+end

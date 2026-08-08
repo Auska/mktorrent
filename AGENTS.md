@@ -4,50 +4,56 @@ This file provides guidance to CodeBuddy Code when working with code in this rep
 
 ## Project overview
 
-mktorrent is a C tool that creates BitTorrent metainfo (`.torrent`) files. It walks a target file or directory, hashes the content in fixed-size pieces with SHA-1, and writes a bencoded metainfo file. GPLv2. There is no test suite and no CI.
+mktorrent is a C tool that creates BitTorrent metainfo (`.torrent`) files. It walks a target file or directory, hashes the content in fixed-size pieces with SHA-1, and writes a bencoded metainfo file. GPLv2. Unit tests live in `tests/` (Unity framework, built via xmake); there is no CI.
 
 ## Build
 
-Two build systems are in sync: GNU/BSD make (shipped) and xmake (added locally).
-
-```sh
-make                 # default build, produces ./mktorrent
-make clean           # remove binary and *.o
-make allinone        # single translation unit (-DALLINONE, main.c includes all .c files)
-make install PREFIX=/usr/local    # install binary
-make -f BSDmakefile  # for old BSD make
-```
-
-Feature flags (pass as `make FLAG=1`; `CFLAGS ?= -O2 -Wall -Wextra -Wpedantic` by default):
-
-| Flag | Effect |
-|------|--------|
-| `USE_PTHREADS=1` | compile `hash_pthreads.c` instead of `hash.c`, link `-lpthread` |
-| `USE_OPENSSL=1` | use OpenSSL EVP SHA-1 instead of bundled `sha1.c`, link `-lcrypto` |
-| `USE_LONG_OPTIONS=1` | enable `--announce` style long options |
-| `USE_LARGE_FILES=1` | `-D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64` for >2GB files on 32-bit |
-| `NO_HASH_CHECK=1` | skip the "bytes hashed == reported size" verification |
-| `MAX_OPENFD=n` | fd cap for the directory walker (default 100) |
-| `DEBUG=1` | leftover debug code |
-
-xmake equivalent (options map 1:1 to the flags above, except `allinone`):
+Built with xmake (the make-based build was removed). Compiles as C23 (`-std=gnu23`).
 
 ```sh
 xmake                              # default build
 xmake f --pthreads=y --long_options=y --openssl=y   # re-configure, then xmake
+xmake                              # rebuild with the new options
 xmake install --installdir=<dir>
+xmake clean                        # remove build artifacts
 ```
 
-Version string is compiled in as `-DVERSION="VYYYYMMDD"` (Makefile: `version = V$(shell date +%Y%m%d)`). When passing VERSION yourself, GCC needs the literal quotes spelling `-DVERSION="V..."`.
+Feature flags (pass as `xmake f --<option>=<value>`, then rebuild):
+
+| Option | Effect |
+|--------|--------|
+| `--pthreads=y` | compile `hash_pthreads.c` instead of `hash.c`, link `-lpthread` |
+| `--openssl=y` | use OpenSSL EVP SHA-1 instead of bundled `sha1.c`, link `-lcrypto` |
+| `--long_options=y` | enable `--announce` style long options |
+| `--large_files=y` | `-D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64` for >2GB files on 32-bit |
+| `--no_hash_check=y` | skip the "bytes hashed == reported size" verification |
+| `--max_openfd=n` | fd cap for the directory walker (default 100) |
+| `--debug=y` | leftover debug code |
+| `--allinone=y` | single translation unit (`-DALLINONE`, main.c includes all .c files) |
+
+Version string is compiled in as `-DVERSION="VYYYYMMDD"`. When passing VERSION yourself, GCC needs the literal quotes spelling `-DVERSION="V..."`.
 
 ### Run
 
 ```sh
-./mktorrent -a http://tracker/announce -o out.torrent <file-or-dir>
-./mktorrent -h   # help
+./build/linux/x86_64/release/mktorrent -a http://tracker/announce -o out.torrent <file-or-dir>
+./build/linux/x86_64/release/mktorrent -h   # help
 ```
 
-There is no lint/test target; the build is expected to stay warning-free under `-Wall -Wextra -Wpedantic`.
+## Tests
+
+Unity-based unit tests cover `ll.c`, `sha1.c`, `hash.c` (serial), `output.c`, and `ftw.c` (not `main.c`/`init.c`):
+
+```sh
+xmake f --tests=y    # fetch unity_test and enable the mktorrent-tests target
+xmake               # build mktorrent + mktorrent-tests
+xmake run mktorrent-tests   # run the suite (expect "20 Tests 0 Failures")
+xmake f --tests=n    # disable tests again
+```
+
+Test files that include `ll.h`/`mktorrent.h` must `#include "export.h"` first (those headers do not include it themselves). `tests/test_util.{c,h}` provide stdout-silencing helpers (make_hash/write_metainfo print progress) and temp-file/bencode-search helpers. The test target defines `VERSION="Vtest"`, so the output tests exercise whatever the compiled version string is.
+
+There is no lint target; the build is expected to stay warning-free under `-Wall -Wextra -Wpedantic`.
 
 ## Architecture
 
