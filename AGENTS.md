@@ -12,19 +12,18 @@ Built with xmake (the make-based build was removed). Compiles as C23 (`-std=gnu2
 
 ```sh
 xmake                              # default build
-xmake f --pthreads=y --long_options=y --openssl=y   # re-configure, then xmake
-xmake                              # rebuild with the new options
+xmake                              # rebuild after changing options
 xmake install --installdir=<dir>
 xmake clean                        # remove build artifacts
 ```
 
-Feature flags (pass as `xmake f --<option>=<value>`, then rebuild):
+Feature flags (pass as `xmake f --<option>=<value>`, then rebuild). `--pthreads`, `--openssl` and `--long_options` are **on by default**; use `=n` to turn them off:
 
 | Option | Effect |
 |--------|--------|
-| `--pthreads=y` | compile `hash_pthreads.c` instead of `hash.c`, link `-lpthread` |
-| `--openssl=y` | use OpenSSL EVP SHA-1 instead of bundled `sha1.c`, link `-lcrypto` |
-| `--long_options=y` | enable `--announce` style long options |
+| `--pthreads=n` | default on: compile `hash_pthreads.c` instead of `hash.c`, link `-lpthread` |
+| `--openssl=n` | default on: use OpenSSL EVP SHA-1 instead of bundled `sha1.c`, link `-lcrypto` |
+| `--long_options=n` | default on: enable `--announce` style long options |
 | `--large_files=y` | `-D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64` for >2GB files on 32-bit |
 | `--no_hash_check=y` | skip the "bytes hashed == reported size" verification |
 | `--max_openfd=n` | fd cap for the directory walker (default 100) |

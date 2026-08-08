@@ -3,9 +3,9 @@
 -- Mirrors the behaviour of the shipped Makefile/GNUmakefile:
 --
 --   xmake                              default build
---   xmake f --pthreads=y               use pthreads for hashing
---   xmake f --openssl=y                use OpenSSL SHA1 (requires libcrypto)
---   xmake f --long_options=y           enable long command line options
+--   xmake f --pthreads=n               disable pthreads hashing (default: y)
+--   xmake f --openssl=n                use built-in SHA1 instead of OpenSSL (default: y)
+--   xmake f --long_options=n           disable long options (default: y)
 --   xmake f --large_files=y            32-bit support for files > 2GB
 --   xmake f --no_hash_check=y          disable the redundant byte-count check
 --   xmake f --max_openfd=256           directory walker fd limit (default 100)
@@ -19,17 +19,17 @@ set_version("V" .. os.date("%Y%m%d"))
 set_xmakever("2.8.6")
 
 option("pthreads")
-    set_default(false)
+    set_default(true)
     set_showmenu(true)
     set_description("Use multiple POSIX threads for calculating hashes")
 
 option("openssl")
-    set_default(false)
+    set_default(true)
     set_showmenu(true)
     set_description("Use the SHA1 implementation in OpenSSL instead of the built-in one")
 
 option("long_options")
-    set_default(false)
+    set_default(true)
     set_showmenu(true)
     set_description("Enable long command line options, started with two dashes")
 
