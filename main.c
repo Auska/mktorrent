@@ -112,31 +112,31 @@ int main(int argc, char *argv[])
 	FILE *file;	/* stream for writing to the metainfo file */
 	struct metafile m = {
 		/* options */
-		0,    /* piece_length, 0 by default indicates length should be calculated automatically */
-		NULL, /* announce_list */
-		NULL, /* comment */
-		NULL, /* created_by */
-		NULL, /* publisher */
-		NULL, /* publisher_url */
-		NULL, /* torrent_name */
-		NULL, /* metainfo_file_path */
-		NULL, /* web_seed_url */
-		0,    /* target_is_directory  */
-		0,    /* no_creation_date */
-		0,    /* private */
-		NULL, /* source string */
-		0,    /* cross_seed */
-		0,    /* verbose */
-		0,    /* force_overwrite */
-		NULL, /* exclude_list */
+		.piece_length = 0,    /* 0 means the length is calculated automatically */
+		.announce_list = NULL,
+		.comment = NULL,
+		.created_by = NULL,
+		.publisher = NULL,
+		.publisher_url = NULL,
+		.torrent_name = NULL,
+		.metainfo_file_path = NULL,
+		.web_seed_list = NULL,
+		.target_is_directory = 0,
+		.no_creation_date = 0,
+		.private = 0,
+		.source = NULL,
+		.cross_seed = 0,
+		.verbose = 0,
+		.force_overwrite = 0,
+		.exclude_list = NULL,
 #ifdef USE_PTHREADS
-		0,    /* threads, initialised by init() */
+		.threads = 0,         /* initialised by init() */
 #endif
 
 		/* information calculated by read_dir() */
-		0,    /* size */
-		NULL, /* file_list */
-		0     /* pieces */
+		.size = 0,
+		.file_list = NULL,
+		.pieces = 0
 	};
 
 	/* print who we are */
