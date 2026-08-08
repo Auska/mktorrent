@@ -65,7 +65,7 @@
 #ifdef SHA1_VERBOSE
 static void SHAPrintContext(SHA_CTX *context, char *msg)
 {
-	printf("%s (%d,%d) %x %x %x %x %x\n", msg, context->count[0], context->count[1],
+	printf("%s (%u,%u) %x %x %x %x %x\n", msg, context->count[0], context->count[1],
 	       context->state[0], context->state[1], context->state[2], context->state[3],
 	       context->state[4]);
 }

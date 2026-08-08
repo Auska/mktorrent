@@ -111,16 +111,18 @@ static void set_absolute_file_path(struct metafile *m)
 	/* if the metainfo file path isn't set */
 	if (m->metainfo_file_path == NULL) {
 		/* append <torrent name>.torrent to the working dir */
-		string = realloc(string, length + strlen(m->torrent_name) + 10);
-		FATAL_IF0(string == NULL, "out of memory\n");
-		snprintf(string + length, strlen(m->torrent_name) + 10, DIRSEP "%s.torrent",
+		char *new_string = realloc(string, length + strlen(m->torrent_name) + 10);
+		FATAL_IF0(new_string == NULL, "out of memory\n");
+		snprintf(new_string + length, strlen(m->torrent_name) + 10, DIRSEP "%s.torrent",
 			 m->torrent_name);
+		string = new_string;
 	} else {
 		/* otherwise append the torrent path to the working dir */
-		string = realloc(string, length + strlen(m->metainfo_file_path) + 2);
-		FATAL_IF0(string == NULL, "out of memory\n");
-		snprintf(string + length, strlen(m->metainfo_file_path) + 2, DIRSEP "%s",
+		char *new_string = realloc(string, length + strlen(m->metainfo_file_path) + 2);
+		FATAL_IF0(new_string == NULL, "out of memory\n");
+		snprintf(new_string + length, strlen(m->metainfo_file_path) + 2, DIRSEP "%s",
 			 m->metainfo_file_path);
+		string = new_string;
 	}
 
 	m->metainfo_file_path = string;

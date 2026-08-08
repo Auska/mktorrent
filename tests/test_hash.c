@@ -70,6 +70,7 @@ void test_hash_two_pieces_single_file(void)
 	unsigned char expected[SHA_DIGEST_LENGTH];
 	unsigned int i;
 
+	TEST_ASSERT_NOT_NULL(content);
 	for (i = 0; i < plen; i++)
 		content[i] = 'A';
 	memcpy(content + plen, "abc", 3);
@@ -111,6 +112,7 @@ void test_hash_spanning_files(void)
 	unsigned char expected[SHA_DIGEST_LENGTH];
 	unsigned int i;
 
+	TEST_ASSERT_NOT_NULL(content1);
 	for (i = 0; i < plen; i++)
 		content1[i] = 'B';
 
@@ -155,6 +157,9 @@ void test_hash_spanning_three_files(void)
 	unsigned char *content1 = malloc(plen - 2);
 	unsigned char *piece1 = malloc(plen);
 	unsigned int i;
+
+	TEST_ASSERT_NOT_NULL(content1);
+	TEST_ASSERT_NOT_NULL(piece1);
 
 	/* 32766 + 2 + 4 bytes = two pieces: the first piece ends 2 bytes
 	   into the second file, the second piece lives entirely in the third */

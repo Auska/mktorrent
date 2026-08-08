@@ -116,7 +116,7 @@ static void write_file_list(FILE *f, struct ll *list)
 			   will only write the first subdirectory name */
 			*b = '\0';
 			/* print it bencoded */
-			fprintf(f, "%lu:%s", b - a, a);
+			fprintf(f, "%lu:%s", (unsigned long)(b - a), a);
 			/* undo our alteration to the string */
 			*b = DIRSEP_CHAR;
 			/* and move a to the beginning of the next
