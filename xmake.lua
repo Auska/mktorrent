@@ -115,11 +115,13 @@ target("mktorrent")
         end
     end)
 
-    -- compiler flags (POSIX toolchains): C23 (GNU dialect) + warnings
+    -- compiler flags (POSIX toolchains): C23 (GNU dialect) + warnings;
+    -- -Werror=format turns printf format-string mismatches into hard errors
     if is_plat("windows") then
         add_cxflags("/W4")
     else
-        add_cxflags("-std=gnu23", "-Wall", "-Wextra", "-Wpedantic")
+        add_cxflags("-std=gnu23", "-Wall", "-Wextra", "-Wpedantic",
+                    "-Werror=format")
     end
 target_end()
 
@@ -158,6 +160,7 @@ if has_config("tests") then
         if is_plat("windows") then
             add_cxflags("/W4")
         else
-            add_cxflags("-std=gnu23", "-Wall", "-Wextra", "-Wpedantic")
+            add_cxflags("-std=gnu23", "-Wall", "-Wextra", "-Wpedantic",
+                        "-Werror=format")
         end
 end

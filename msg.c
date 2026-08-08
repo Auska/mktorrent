@@ -25,7 +25,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
 #include "msg.h"
 
 
-[[noreturn]] EXPORT void fatal(const char *format, ...)
+[[noreturn]] PRINTF_ATTR(1, 2) EXPORT void fatal(const char *format, ...)
 {
 
 	va_list args;

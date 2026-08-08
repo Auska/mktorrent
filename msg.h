@@ -3,7 +3,15 @@
 
 #include "export.h"
 
-[[noreturn]] EXPORT void fatal(const char *format, ...);
+/* let the compiler validate format strings of printf-like varargs functions */
+#if defined(__GNUC__) || defined(__clang__)
+#define PRINTF_ATTR(fmt, first_vararg)                                                             \
+	__attribute__((format(printf, fmt, first_vararg)))
+#else
+#define PRINTF_ATTR(fmt, first_vararg)
+#endif
+
+[[noreturn]] PRINTF_ATTR(1, 2) EXPORT void fatal(const char *format, ...);
 
 
 #define FATAL_IF(cond, format, ...)                                                                \

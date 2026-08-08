@@ -53,7 +53,7 @@ xmake f --tests=n    # disable tests again
 
 Test files that include `ll.h`/`mktorrent.h` must `#include "export.h"` first (those headers do not include it themselves). `tests/test_util.{c,h}` provide stdout-silencing helpers (make_hash/write_metainfo print progress) and temp-file/bencode-search helpers. The test target defines `VERSION="Vtest"`, so the output tests exercise whatever the compiled version string is.
 
-There is no lint target; the build is expected to stay warning-free under `-Wall -Wextra -Wpedantic`.
+There is no lint target; the build is expected to stay warning-free under `-Wall -Wextra -Wpedantic`. `fatal()` and the `FATAL_IF`/`FATAL_IF0` macros carry a `format(printf)` attribute and the build uses `-Werror=format`, so printf format-string mismatches fail the build.
 
 ## Architecture
 
