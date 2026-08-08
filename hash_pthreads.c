@@ -74,7 +74,9 @@ struct queue {
 	pthread_cond_t cond_full;
 	unsigned int done;
 	unsigned int pieces;
-	unsigned int pieces_hashed;
+	/* read by the progress thread without holding any mutex */
+	_Atomic unsigned int pieces_hashed;
+	_Atomic int stop;
 };
 
 static struct piece *get_free(struct queue *q, size_t piece_length)
@@ -170,16 +172,12 @@ static void free_buffers(struct queue *q)
 static void *print_progress(void *data)
 {
 	struct queue *q = data;
-	int err;
 	struct timespec t;
 
 	t.tv_sec = PROGRESS_PERIOD / 1000000;
 	t.tv_nsec = PROGRESS_PERIOD % 1000000 * 1000;
 
-	err = pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS, NULL);
-	FATAL_IF(err, "cannot set thread cancel type: %s\n", strerror(err));
-
-	while (1) {
+	while (!q->stop) {
 		/* print progress and flush the buffer immediately */
 		printf("\rHashed %u of %u pieces.", q->pieces_hashed, q->pieces);
 		fflush(stdout);
@@ -288,12 +286,10 @@ static void read_files(struct metafile *m, struct queue *q, unsigned char *pos)
 EXPORT unsigned char *make_hash(struct metafile *m)
 {
 	struct queue q = {
-		NULL, NULL, 0, 0,
-		PTHREAD_MUTEX_INITIALIZER,
-		PTHREAD_MUTEX_INITIALIZER,
-		PTHREAD_COND_INITIALIZER,
-		PTHREAD_COND_INITIALIZER,
-		0, 0, 0
+		.mutex_free  = PTHREAD_MUTEX_INITIALIZER,
+		.mutex_full  = PTHREAD_MUTEX_INITIALIZER,
+		.cond_empty  = PTHREAD_COND_INITIALIZER,
+		.cond_full   = PTHREAD_COND_INITIALIZER,
 	};
 	pthread_t print_progress_thread;	/* progress printer thread */
 	pthread_t *workers;
@@ -302,7 +298,7 @@ EXPORT unsigned char *make_hash(struct metafile *m)
 	int err;
 
 	workers = malloc(m->threads * sizeof(pthread_t));
-	hash_string = malloc(m->pieces * SHA_DIGEST_LENGTH);
+	hash_string = malloc((size_t)m->pieces * SHA_DIGEST_LENGTH);
 	FATAL_IF0(workers == NULL || hash_string == NULL, "out of memory\n");
 
 	q.pieces = m->pieces;
@@ -322,8 +318,7 @@ EXPORT unsigned char *make_hash(struct metafile *m)
 	read_files(m, &q, hash_string);
 
 	/* we're done so stop printing our progress. */
-	err = pthread_cancel(print_progress_thread);
-	FATAL_IF(err, "cannot cancel thread: %s\n", strerror(err));
+	q.stop = 1;
 
 	/* inform workers we're done */
 	set_done(&q);

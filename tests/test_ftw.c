@@ -152,3 +152,37 @@ void test_ftw_exclude_pattern(void)
 	ll_free(m.exclude_list, NULL);
 	remove_tree(root);
 }
+
+void test_ftw_skips_symlinks(void)
+{
+	char root[] = "/tmp/mktorrent_ftw_XXXXXX";
+	struct metafile m;
+	const char *expected[] = { "real.txt" };
+	char path[512];
+
+	TEST_ASSERT_NOT_NULL(mkdtemp(root));
+
+	snprintf(path, sizeof(path), "%s/real.txt", root);
+	write_file(path, "data");
+	/* a symlink to a file: its content must not be hashed twice */
+	snprintf(path, sizeof(path), "%s/dup", root);
+	TEST_ASSERT_EQUAL_INT(0, symlink("real.txt", path));
+	/* a symlink cycle: must not be recursed into (would ELOOP) */
+	snprintf(path, sizeof(path), "%s/loop", root);
+	TEST_ASSERT_EQUAL_INT(0, symlink(".", path));
+
+	m = make_metafile();
+	TEST_ASSERT_EQUAL_INT(0, file_tree_walk(root, 10, collect_files, &m));
+	assert_basenames(&m, expected, 1);
+
+	ll_free(m.file_list, test_free_file_data);
+	ll_free(m.exclude_list, NULL);
+
+	snprintf(path, sizeof(path), "%s/dup", root);
+	unlink(path);
+	snprintf(path, sizeof(path), "%s/loop", root);
+	unlink(path);
+	snprintf(path, sizeof(path), "%s/real.txt", root);
+	unlink(path);
+	rmdir(root);
+}

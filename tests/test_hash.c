@@ -19,6 +19,9 @@ static struct metafile make_empty_metafile(void)
 
 	memset(&m, 0, sizeof(m));
 	m.piece_length = 32768;
+#ifdef USE_PTHREADS
+	m.threads = 2;
+#endif
 	m.file_list = ll_new();
 	TEST_ASSERT_NOT_NULL(m.file_list);
 	return m;

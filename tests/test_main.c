@@ -35,6 +35,7 @@ void test_output_cross_seed(void);
 /* test_ftw.c */
 void test_ftw_collects_tree(void);
 void test_ftw_exclude_pattern(void);
+void test_ftw_skips_symlinks(void);
 
 int main(void)
 {
@@ -64,6 +65,7 @@ int main(void)
 
 	RUN_TEST(test_ftw_collects_tree);
 	RUN_TEST(test_ftw_exclude_pattern);
+	RUN_TEST(test_ftw_skips_symlinks);
 
 	return UNITY_END();
 }

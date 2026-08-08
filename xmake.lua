@@ -140,8 +140,19 @@ if has_config("tests") then
             "tests/test_output.c",
             "tests/test_ftw.c",
             "tests/test_util.c")
-        -- library under test (main.c and init.c are not unit tested)
-        add_files("ll.c", "sha1.c", "msg.c", "hash.c", "output.c", "ftw.c")
+        on_load(function (target)
+            -- library under test (main.c and init.c are not unit tested);
+            -- mirror the pthreads option so the hash tests also exercise
+            -- the multithreaded implementation
+            if get_config("pthreads") then
+                target:add("defines", "USE_PTHREADS")
+                target:add("links", "pthread")
+                target:add("files", "hash_pthreads.c")
+            else
+                target:add("files", "hash.c")
+            end
+            target:add("files", "ll.c", "sha1.c", "msg.c", "output.c", "ftw.c")
+        end)
 
         if is_plat("windows") then
             add_cxflags("/W4")

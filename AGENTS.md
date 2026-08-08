@@ -96,8 +96,9 @@ The pthread build runs a dedicated progress-printing thread (every `PROGRESS_PER
 - `ftw.c` reaches into `struct metafile` (as its opaque callback `data`) to read `exclude_list` — the walker is coupled to metafile.
 - The pthread path prints `\r`-based progress to stdout even when piped.
 
-## Known issues (verified in analysis)
+## Known issues
 
-- **Data race** in `hash_pthreads.c`: `q->pieces_hashed` is written under `mutex_free` (`put_free`) but read without synchronization by the progress thread (`print_progress`). Reproducible with ThreadSanitizer.
-- **Symlinks are followed** by `ftw.c` (`stat`, not `lstat`): a symlink cycle aborts the whole run with `ELOOP` (fatal), and a symlink to a regular file hashes the content twice.
-- **Integer overflow risk**: `m->pieces * SHA_DIGEST_LENGTH` is computed in 32-bit `unsigned int` before `malloc` in `make_hash` (`hash.c`, `hash_pthreads.c`).
+- **Thread-safety**: `hash_pthreads.c`'s progress counter was previously a data race (read without synchronization by the progress thread); it is now `_Atomic`. The progress thread is stopped via an atomic flag and joined, not `pthread_cancel`ed. If touching this code, keep the progress thread free of stdio-lock-taking cancellation and keep `pieces_hashed` accesses atomic.
+- **Symlinks**: `ftw.c` uses `lstat()` so symlinks are skipped (a symlink cycle used to abort the whole run with `ELOOP`). This is intentional; do not switch back to `stat()`.
+- **Bencode lengths**: the `created by` and `x_cross_seed` length prefixes must be computed from the actual string lengths; `CROSS_SEED_RAND_LENGTH` is the only magic number allowed.
+- **`_Atomic` requires C11+**: the code is built as C23 (`-std=gnu23`), so this is fine; a plain-C89 compiler will not build it.

@@ -76,7 +76,7 @@ EXPORT unsigned char *make_hash(struct metafile *m)
 
 	/* allocate memory for the hash string
 	   every SHA1 hash is SHA_DIGEST_LENGTH (20) bytes long */
-	hash_string = malloc(m->pieces * SHA_DIGEST_LENGTH);
+	hash_string = malloc((size_t)m->pieces * SHA_DIGEST_LENGTH);
 	/* allocate memory for the read buffer to store 1 piece */
 	read_buf = malloc(m->piece_length);
 

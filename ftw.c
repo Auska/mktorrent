@@ -233,7 +233,11 @@ EXPORT int file_tree_walk(const char *dirname, unsigned int nfds,
 				}
 			}
 
-			if (stat(path, &sbuf)) {
+			/* lstat: do not follow symlinks. Following them would let a
+			   symlink cycle recurse until ELOOP, and a symlink to a file
+			   would hash the same content twice. The callback ignores
+			   non-regular files (S_ISLNK), so symlinks are skipped. */
+			if (lstat(path, &sbuf)) {
 				fprintf(stderr, "fatal error: cannot stat '%s': %s\n",
 						path, strerror(errno));
 				return cleanup(ds, path, -1);
