@@ -1,7 +1,5 @@
 # CMake build for mktorrent
 #
-# Mirrors the behaviour of the xmake.lua build:
-#
 #   cmake -B build                                    default build
 #   cmake -B build -DUSE_PTHREADS=OFF                 disable pthreads hashing (default ON)
 #   cmake -B build -DUSE_OPENSSL=OFF                  use built-in SHA1 instead of OpenSSL (default ON)
@@ -108,7 +106,7 @@ endif()
 install(TARGETS mktorrent RUNTIME DESTINATION bin)
 
 if(BUILD_TESTS)
-    # vendored Unity (same version the xmake build pins via unity_test)
+    # vendored Unity (external/Unity-2.7.0)
     set(UNITY_EXTENSION_FIXTURE_ENABLED OFF)
     set(UNITY_EXTENSION_MEMORY_ENABLED OFF)
     add_subdirectory(external/Unity-2.7.0)
@@ -133,8 +131,8 @@ if(BUILD_TESTS)
     target_link_libraries(mktorrent-tests PRIVATE unity::framework)
     # library under test (main.c and init.c are not unit tested);
     # mirror the pthreads option so the hash tests also exercise
-    # the multithreaded implementation; OpenSSL is never used here
-    # (xmake defines only USE_PTHREADS, with the bundled sha1.c compiled in)
+    # the multithreaded implementation; the tests always use the
+    # bundled sha1.c (USE_OPENSSL is never defined for them)
     list(REMOVE_ITEM MKTORRENT_DEFINES USE_OPENSSL)
     target_compile_definitions(mktorrent-tests PRIVATE ${MKTORRENT_DEFINES}
         VERSION="Vtest")

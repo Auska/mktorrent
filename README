@@ -1,5 +1,16 @@
-Type 'xmake' to build the program.
-Do 'xmake install' to install the program to /usr/local/bin.
-For more options look in xmake.lua.
+mktorrent creates BitTorrent metainfo (.torrent) files.
 
+Build and install:
+
+    cmake -B build
+    cmake --build build
+    cmake --install build --prefix /usr/local
+
+Run tests (uses the vendored Unity in external/):
+
+    cmake -B build -DBUILD_TESTS=ON
+    cmake --build build
+    ctest --test-dir build
+
+For build options look in CMakeLists.txt.
 See https://github.com/pobrn/mktorrent/wiki for more info.

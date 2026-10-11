@@ -4,11 +4,7 @@
 # generated torrent files
 *.torrent
 
-# xmake build artifacts
-.xmake/
-build/
-
-# cmake build artifacts
+# build artifacts
 build*/
 CMakeCache.txt
 CMakeFiles/

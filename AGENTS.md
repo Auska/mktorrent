@@ -4,50 +4,49 @@ This file provides guidance to CodeBuddy Code when working with code in this rep
 
 ## Project overview
 
-mktorrent is a C tool that creates BitTorrent metainfo (`.torrent`) files. It walks a target file or directory, hashes the content in fixed-size pieces with SHA-1, and writes a bencoded metainfo file. GPLv2. Unit tests live in `tests/` (Unity framework, built via xmake); there is no CI.
+mktorrent is a C tool that creates BitTorrent metainfo (`.torrent`) files. It walks a target file or directory, hashes the content in fixed-size pieces with SHA-1, and writes a bencoded metainfo file. GPLv2. Unit tests live in `tests/` (Unity framework, built via CMake); there is no CI.
 
 ## Build
 
-Built with xmake (the make-based build was removed). Compiles as C23 (`-std=gnu23`).
+Built with CMake. Compiles as C23 (`-std=gnu23`).
 
 ```sh
-xmake                              # default build
-xmake                              # rebuild after changing options
-xmake install --installdir=<dir>
-xmake clean                        # remove build artifacts
+cmake -B build                      # configure (default options)
+cmake --build build                 # build; re-run after changing options
+cmake --install build --prefix=<dir>
+rm -rf build                        # remove build artifacts
 ```
 
-Feature flags (pass as `xmake f --<option>=<value>`, then rebuild). `--pthreads`, `--openssl` and `--long_options` are **on by default**; use `=n` to turn them off:
+Feature flags (pass with `cmake -B build -D<OPTION>=<value>`, then rebuild). `USE_PTHREADS`, `USE_OPENSSL` and `USE_LONG_OPTIONS` are **ON by default**; pass `=OFF` to turn them off:
 
 | Option | Effect |
 |--------|--------|
-| `--pthreads=n` | default on: compile `hash_pthreads.c` instead of `hash.c`, link `-lpthread` |
-| `--openssl=n` | default on: use OpenSSL EVP SHA-1 instead of bundled `sha1.c`, link `-lcrypto` |
-| `--long_options=n` | default on: enable `--announce` style long options |
-| `--large_files=y` | `-D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64` for >2GB files on 32-bit |
-| `--no_hash_check=y` | skip the "bytes hashed == reported size" verification |
-| `--max_openfd=n` | fd cap for the directory walker (default 100) |
-| `--debug=y` | leftover debug code |
-| `--allinone=y` | single translation unit (`-DALLINONE`, main.c includes all .c files) |
+| `USE_PTHREADS=OFF` | default on: compile `hash_pthreads.c` instead of `hash.c`, link `-lpthread` |
+| `USE_OPENSSL=OFF` | default on: use OpenSSL EVP SHA-1 instead of bundled `sha1.c`, link `OpenSSL::Crypto` |
+| `USE_LONG_OPTIONS=OFF` | default on: enable `--announce` style long options |
+| `LARGE_FILES=ON` | `-D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64` for >2GB files on 32-bit |
+| `NO_HASH_CHECK=ON` | skip the "bytes hashed == reported size" verification |
+| `MAX_OPENFD=n` | fd cap for the directory walker (default 100) |
+| `DEBUG=ON` | leftover debug code |
+| `ALLINONE=ON` | single translation unit (`-DALLINONE`, main.c includes all .c files) |
 
 Version string is compiled in from the latest git tag via `git describe --tags --always --dirty` (falls back to the short commit hash, or "unknown" outside a git checkout). When passing VERSION yourself, GCC needs the literal quotes spelling `-DVERSION="V..."`.
 
 ### Run
 
 ```sh
-./build/linux/x86_64/release/mktorrent -a http://tracker/announce -o out.torrent <file-or-dir>
-./build/linux/x86_64/release/mktorrent -h   # help
+./build/mktorrent -a http://tracker/announce -o out.torrent <file-or-dir>
+./build/mktorrent -h   # help
 ```
 
 ## Tests
 
-Unity-based unit tests cover `ll.c`, `sha1.c`, `hash.c` (serial), `output.c`, and `ftw.c` (not `main.c`/`init.c`):
+Unity-based unit tests (vendored in `external/Unity-2.7.0`) cover `ll.c`, `sha1.c`, `hash.c` (serial), `output.c`, and `ftw.c` (not `main.c`/`init.c`):
 
 ```sh
-xmake f --tests=y    # fetch unity_test and enable the mktorrent-tests target
-xmake               # build mktorrent + mktorrent-tests
-xmake run mktorrent-tests   # run the suite (expect "27 Tests 0 Failures")
-xmake f --tests=n    # disable tests again
+cmake -B build -DBUILD_TESTS=ON
+cmake --build build
+ctest --test-dir build      # expect "27 Tests 0 Failures"
 ```
 
 Test files that include `ll.h`/`mktorrent.h` must `#include "export.h"` first (those headers do not include it themselves). `tests/test_util.{c,h}` provide stdout-silencing helpers (make_hash/write_metainfo print progress) and temp-file/bencode-search helpers. The test target defines `VERSION="Vtest"`, so the output tests exercise whatever the compiled version string is.
