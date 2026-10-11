@@ -76,22 +76,23 @@ if(NOT MAX_OPENFD EQUAL 100)
 endif()
 
 if(ALLINONE)
-    add_executable(mktorrent main.c)
+    add_executable(mktorrent src/main.c)
     target_compile_definitions(mktorrent PRIVATE ALLINONE)
 else()
-    set(MKTORRENT_SOURCES ftw.c init.c output.c main.c msg.c ll.c)
+    set(MKTORRENT_SOURCES src/ftw.c src/init.c src/output.c src/main.c src/msg.c src/ll.c)
     if(USE_OPENSSL)
         # SHA1 comes from libcrypto, the built-in sha1.c is not compiled
     else()
-        list(APPEND MKTORRENT_SOURCES sha1.c)
+        list(APPEND MKTORRENT_SOURCES src/sha1.c)
     endif()
     if(USE_PTHREADS)
-        list(APPEND MKTORRENT_SOURCES hash_pthreads.c)
+        list(APPEND MKTORRENT_SOURCES src/hash_pthreads.c)
     else()
-        list(APPEND MKTORRENT_SOURCES hash.c)
+        list(APPEND MKTORRENT_SOURCES src/hash.c)
     endif()
     add_executable(mktorrent ${MKTORRENT_SOURCES})
 endif()
+target_include_directories(mktorrent PRIVATE src)
 
 target_compile_definitions(mktorrent PRIVATE ${MKTORRENT_DEFINES}
     VERSION="${MKTORRENT_VERSION}")
@@ -126,7 +127,7 @@ if(BUILD_TESTS)
         tests/test_init.c
         tests/test_util.c)
     target_include_directories(mktorrent-tests PRIVATE
-        ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/tests
+        ${CMAKE_CURRENT_SOURCE_DIR}/src ${CMAKE_CURRENT_SOURCE_DIR}/tests
         ${CMAKE_CURRENT_BINARY_DIR}/unity-shim)
     target_link_libraries(mktorrent-tests PRIVATE unity::framework)
     # library under test (main.c and init.c are not unit tested);
@@ -137,12 +138,12 @@ if(BUILD_TESTS)
     target_compile_definitions(mktorrent-tests PRIVATE ${MKTORRENT_DEFINES}
         VERSION="Vtest")
     if(USE_PTHREADS)
-        target_sources(mktorrent-tests PRIVATE hash_pthreads.c)
+        target_sources(mktorrent-tests PRIVATE src/hash_pthreads.c)
         target_link_libraries(mktorrent-tests PRIVATE pthread)
     else()
-        target_sources(mktorrent-tests PRIVATE hash.c)
+        target_sources(mktorrent-tests PRIVATE src/hash.c)
     endif()
-    target_sources(mktorrent-tests PRIVATE ll.c sha1.c msg.c output.c ftw.c)
+    target_sources(mktorrent-tests PRIVATE src/ll.c src/sha1.c src/msg.c src/output.c src/ftw.c)
 
     enable_testing()
     add_test(NAME mktorrent-tests COMMAND mktorrent-tests)

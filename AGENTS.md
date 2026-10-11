@@ -4,7 +4,7 @@ This file provides guidance to CodeBuddy Code when working with code in this rep
 
 ## Project overview
 
-mktorrent is a C tool that creates BitTorrent metainfo (`.torrent`) files. It walks a target file or directory, hashes the content in fixed-size pieces with SHA-1, and writes a bencoded metainfo file. GPLv2. Unit tests live in `tests/` (Unity framework, built via CMake); there is no CI.
+mktorrent is a C tool that creates BitTorrent metainfo (`.torrent`) files. It walks a target file or directory, hashes the content in fixed-size pieces with SHA-1, and writes a bencoded metainfo file. GPLv2. All sources (and headers) live in `src/`; the filenames below are relative to it. Unit tests live in `tests/` (Unity framework, built via CMake); there is no CI.
 
 ## Build
 
